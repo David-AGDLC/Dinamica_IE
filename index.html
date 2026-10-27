@@ -1,1288 +1,1046 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simulador de Matriz Renovable de Guatemala (Meta 70%)</title>
-  <!-- Tailwind CSS CDN -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulador Matriz Energética de Guatemala (70% Renovable)</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts: Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-          }
-        }
-      }
-    }
-  </script>
   <style>
-    input[type=range] {
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0b1120;
+      color: #f1f5f9;
+    }
+    input[type="range"] {
       -webkit-appearance: none;
-      width: 100%;
-      background: transparent;
-    }
-    input[type=range]:focus {
-      outline: none;
-    }
-    input[type=range]::-webkit-slider-runnable-track {
+      appearance: none;
       width: 100%;
       height: 10px;
-      cursor: pointer;
-      background: #e2e8f0;
-      border-radius: 9999px;
+      border-radius: 999px;
+      background: #1e293b;
+      outline: none;
     }
-    input[type=range]::-webkit-slider-thumb {
-      height: 24px;
-      width: 24px;
-      border-radius: 50%;
-      background: currentColor;
-      cursor: pointer;
+    input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      margin-top: -7px;
-      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.25);
-      border: 3px solid #ffffff;
-      transition: transform 0.15s ease;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 3px solid #0f172a;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      transition: transform 0.12s ease;
     }
-    input[type=range]::-webkit-slider-thumb:hover {
+    input[type="range"]::-webkit-slider-thumb:hover {
       transform: scale(1.15);
     }
+    .slider-hydro::-webkit-slider-thumb { background: #38bdf8; }
+    .slider-biomass::-webkit-slider-thumb { background: #a3e635; }
+    .slider-solar::-webkit-slider-thumb { background: #facc15; }
+    .slider-wind::-webkit-slider-thumb { background: #2dd4bf; }
+    .slider-geo::-webkit-slider-thumb { background: #fb7185; }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-indigo-600 selection:text-white">
+<body class="min-h-screen pb-16">
 
-  <!-- Barra Superior -->
-  <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-40 shadow-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center text-slate-950 font-bold shadow-md">
-          <i data-lucide="zap" class="w-5 h-5"></i>
+  <!-- HEADER -->
+  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2.5">
+          <span class="px-2.5 py-1 text-xs font-bold uppercase tracking-wider rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+            Sistema Nacional Interconectado • Guatemala
+          </span>
+          <span class="text-xs text-slate-400">Simulador Interactivo de Matriz</span>
         </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <h1 class="text-base sm:text-lg font-extrabold tracking-tight leading-none">Matriz Renovable de Guatemala</h1>
-            <span class="hidden sm:inline-block text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-              Meta 70% Renovable
-            </span>
-          </div>
-          <p class="text-xs text-slate-400 mt-0.5">Simulador de Relevo Estacional, Costo Tarifario, CAPEX y Estabilidad de Red</p>
-        </div>
+        <h1 class="text-xl sm:text-2xl font-extrabold text-white mt-1">
+          Planificador de Dependencia Renovable (Meta 70% Anual)
+        </h1>
       </div>
 
-      <div class="flex items-center gap-3">
-        <label class="inline-flex items-center cursor-pointer bg-slate-800/90 hover:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700 transition-colors">
-          <input type="checkbox" id="autoBalanceToggle" class="sr-only peer" checked>
-          <div class="relative w-9 h-5 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
-          <span class="ms-2.5 text-xs font-medium text-slate-200">Auto-relevo al 70%</span>
+      <!-- BLOQUE SUPERIOR DERECHO: HIDROCARBUROS (GASOLINA / CARBÓN) + AUTO-RELEVO -->
+      <div class="flex flex-wrap items-center gap-3">
+        <!-- Indicador Hidrocarburos -->
+        <div id="hydrocarbonBox" class="px-4 py-2.5 rounded-xl bg-amber-950/50 border border-amber-500/40 flex items-center gap-3">
+          <div class="w-3 h-3 rounded-full bg-amber-500 animate-pulse"></div>
+          <div>
+            <div class="text-[11px] uppercase tracking-wider font-bold text-amber-300/90">
+              Hidrocarburos (Gasolina / Carbón / Búnker)
+            </div>
+            <div class="flex items-baseline gap-2">
+              <span id="fossilShareText" class="text-lg font-extrabold text-white">30.0%</span>
+              <span id="fossilStateBadge" class="text-xs font-semibold text-amber-300">
+                Base térmica de respaldo
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Switch de Auto-ajuste al 70% -->
+        <label class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-slate-800/90 border border-slate-700 cursor-pointer select-none">
+          <input id="autoBalanceToggle" type="checkbox" checked class="w-4 h-4 accent-emerald-500 rounded cursor-pointer" />
+          <div class="text-xs">
+            <div class="font-bold text-slate-200">Fijar Renovables en 70%</div>
+            <div class="text-slate-400">Relevo automático entre sliders</div>
+          </div>
         </label>
       </div>
     </div>
   </header>
 
-  <!-- Contenido Principal -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 pt-6 space-y-6">
 
-    <!-- Panel de Contexto y Barra Global del 70% -->
-    <section class="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-sm space-y-4">
-      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div class="space-y-1">
-          <h2 class="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-            <i data-lucide="sliders" class="w-5 h-5 text-indigo-600"></i>
-            <span>Dinámica de Clase: Diseña el 70% Renovable para 1 Año en Guatemala</span>
+    <!-- PLANTILLAS / ESCENARIOS DE DISEÑO RÁPIDO -->
+    <section class="bg-slate-900/70 border border-slate-800 rounded-2xl p-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">
+            Opciones rápidas de diseño (o mueve los sliders libremente)
           </h2>
-          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-4xl">
-            En Guatemala cerca del <strong>70% de la generación anual es renovable</strong> porque las fuentes se hacen relevo entre la <strong>época lluviosa (may–oct)</strong> y la <strong>época seca con vientos alisios (nov–abr)</strong>. El otro <strong>30%</strong> corresponde a cogeneración estacional (biomasa en ingenios) y respaldo térmico. Ajusta los 4 sliders y analiza cómo cambian los cuadros técnicos antes de evaluar tu plan.
+          <p class="text-xs text-slate-400 mt-0.5">
+            Si una tecnología tiene un punto débil estacional o financiero, puedes compensarla invirtiendo en su energía complementaria.
           </p>
         </div>
-
-        <!-- Botones de Escenarios Rápidos -->
-        <div class="flex flex-wrap items-center gap-1.5">
-          <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mr-1">Escenarios:</span>
-          <button type="button" data-preset="real" class="preset-btn text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
-            Matriz Actual GT
+        <div class="flex flex-wrap gap-2">
+          <button onclick="applyPreset(38, 14, 11, 3.5, 3.5)" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+            ⚖️ Portafolio Equilibrado
           </button>
-          <button type="button" data-preset="hidro" class="preset-btn text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200/60 transition">
-            Exceso Hidráulico
+          <button onclick="applyPreset(52, 8, 4, 4.2, 1.8)" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-sky-950/80 hover:bg-sky-900/80 text-sky-300 border border-sky-500/30 transition">
+            💧 Hidro 52% + Relevo Eólico (&gt;3%)
           </button>
-          <button type="button" data-preset="solar" class="preset-btn text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200/60 transition">
-            Fiebre Solar On-Grid
+          <button onclick="applyPreset(50, 14, 3, 1.5, 1.5)" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-lime-950/80 hover:bg-lime-900/80 text-lime-300 border border-lime-500/30 transition">
+            🌾 Hidro 50% + Biomasa (&gt;13%)
           </button>
-          <button type="button" data-preset="geoeolica" class="preset-btn text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200/60 transition">
-            Geotermia + Eólica Max
+          <button onclick="applyPreset(25, 14, 21, 4, 6)" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-yellow-950/80 hover:bg-yellow-900/80 text-yellow-300 border border-yellow-500/30 transition">
+            ☀️ Alta Solar + Respaldo Geotérmico
           </button>
-          <button type="button" data-preset="optimo" class="preset-btn text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/60 transition">
-            Portafolio Híbrido
+          <button onclick="applyPreset(54, 6, 7, 1.5, 1.5)" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-950/80 hover:bg-rose-900/80 text-rose-300 border border-rose-500/30 transition">
+            ⚠️ Hidro 54% Sin Relevo (Falla en Verano)
           </button>
-        </div>
-      </div>
-
-      <!-- Barra de Distribución de la Matriz Nacional (70% Renovable + 30% Biomasa/Térmica) -->
-      <div class="pt-2">
-        <div class="flex flex-wrap items-center justify-between text-xs font-semibold mb-2 gap-2">
-          <div class="flex items-center gap-2">
-            <span class="text-slate-700">Suma Renovable Configurada:</span>
-            <span id="totalRenewableBadge" class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800">
-              70.0% / 70.0% Meta
-            </span>
-            <button id="normalizeBtn" type="button" class="hidden text-xs font-bold text-indigo-600 hover:text-indigo-800 underline">
-              Ajustar exactamente al 70%
-            </button>
-          </div>
-          <span class="text-slate-500">Resto del Sistema (30%): Biomasa en Zafra + Respaldo Térmico</span>
-        </div>
-
-        <!-- Barra apilada -->
-        <div class="w-full h-4 bg-slate-200 rounded-full overflow-hidden flex shadow-inner">
-          <div id="stackHydro" class="bg-blue-600 h-full transition-all duration-200" style="width: 48%" title="Hidráulica"></div>
-          <div id="stackSolar" class="bg-amber-400 h-full transition-all duration-200" style="width: 10%" title="Solar Fotovoltaica"></div>
-          <div id="stackWind" class="bg-cyan-500 h-full transition-all duration-200" style="width: 6%" title="Eólica"></div>
-          <div id="stackGeo" class="bg-rose-600 h-full transition-all duration-200" style="width: 6%" title="Geotérmica"></div>
-          <div id="stackOther" class="bg-slate-400 h-full transition-all duration-200 flex-1" title="30% Biomasa Ingenios + Térmica"></div>
-        </div>
-
-        <!-- Leyenda de la barra -->
-        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 mt-2.5 text-[11px] font-medium text-slate-600">
-          <div class="flex items-center gap-1.5">
-            <span class="w-2.5 h-2.5 rounded-full bg-blue-600 inline-block"></span>
-            <span>Hidráulica: <strong id="legendHydro">48.0%</strong></span>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
-            <span>Solar (NTGDR): <strong id="legendSolar">10.0%</strong></span>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <span class="w-2.5 h-2.5 rounded-full bg-cyan-500 inline-block"></span>
-            <span>Eólica (SNI): <strong id="legendWind">6.0%</strong></span>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <span class="w-2.5 h-2.5 rounded-full bg-rose-600 inline-block"></span>
-            <span>Geotérmica (Base): <strong id="legendGeo">6.0%</strong></span>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <span class="w-2.5 h-2.5 rounded-full bg-slate-400 inline-block"></span>
-            <span>Biomasa/Térmica: <strong id="legendOther">30.0%</strong></span>
-          </div>
         </div>
       </div>
     </section>
 
-    <!-- Grid Principal: Izquierda (4 Sliders + Cuadros de Texto Reactivos) / Derecha (Impacto Presupuesto, Tarifa, Cobertura) -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-
-      <!-- COLUMNA IZQUIERDA: Los 4 Sliders con sus Cuadros de Texto Dinámicos -->
-      <section class="lg:col-span-7 space-y-4">
-
-        <!-- 1. ENERGÍA HIDRÁULICA -->
-        <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-sm transition-all">
-          <div class="flex items-center justify-between gap-2 mb-2">
-            <div class="flex items-center gap-2.5">
-              <div class="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
-                <i data-lucide="droplets" class="w-5 h-5"></i>
-              </div>
-              <div>
-                <div class="flex items-center gap-2">
-                  <h3 class="text-sm sm:text-base font-bold text-slate-900">1. Energía Hidráulica (Con Embalse)</h3>
-                  <span id="badgeHydro" class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-blue-50 text-blue-700">Gestionable</span>
-                </div>
-                <p class="text-xs text-slate-500">Fuerte en invierno (may–oct) • Requiere topografía y caudales específicos</p>
-              </div>
-            </div>
-            <div class="text-right">
-              <span id="valHydro" class="text-xl font-black text-blue-700">48.0%</span>
-              <span class="block text-[10px] text-slate-400 uppercase font-semibold">de la matriz</span>
-            </div>
-          </div>
-
-          <input type="range" id="sliderHydro" min="0" max="70" step="0.5" value="48" class="text-blue-600 my-2">
-          <div class="flex justify-between text-[11px] text-slate-400 font-medium mb-3">
-            <span>0% (Sin embalses)</span>
-            <span>Rango ideal: 25% – 36%</span>
-            <span>70% (Monodependencia hídrica)</span>
-          </div>
-
-          <!-- Cuadro de Texto Dinámico Hidráulica -->
-          <div id="boxHydro" class="p-3.5 rounded-xl bg-blue-50/70 border border-blue-200 text-xs space-y-1.5 transition-all">
-            <div class="flex items-center justify-between font-bold text-blue-950">
-              <span id="titleHydro">Alta Dependencia Hídrica: Riesgo de Estiaje en Época Seca</span>
-              <span id="impactTagHydro" class="text-[11px] px-2 py-0.5 rounded bg-amber-200/80 text-amber-900">Dispara Tarifa en Verano</span>
-            </div>
-            <p id="descHydro" class="text-slate-700 leading-relaxed">
-              Aunque es una energía gestionable excelente en época de lluvias, depender en exceso de ella deja al país descubierto entre noviembre y abril (época seca). Cuando bajan los embalses, Guatemala debe encender plantas térmicas de hidrocarburos (búnker/carbón), encareciendo la tarifa eléctrica general.
-            </p>
-          </div>
-        </div>
-
-        <!-- 2. ENERGÍA SOLAR FOTOVOLTAICA -->
-        <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-sm transition-all">
-          <div class="flex items-center justify-between gap-2 mb-2">
-            <div class="flex items-center gap-2.5">
-              <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
-                <i data-lucide="sun" class="w-5 h-5"></i>
-              </div>
-              <div>
-                <div class="flex items-center gap-2">
-                  <h3 class="text-sm sm:text-base font-bold text-slate-900">2. Energía Solar Fotovoltaica (NTGDR On-Grid)</h3>
-                  <span id="badgeSolar" class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-800">Variable Diurna</span>
-                </div>
-                <p class="text-xs text-slate-500">90% On-Grid sin baterías • Medición Neta • Protección Anti-isla • ROI 3–5 años</p>
-              </div>
-            </div>
-            <div class="text-right">
-              <span id="valSolar" class="text-xl font-black text-amber-600">10.0%</span>
-              <span class="block text-[10px] text-slate-400 uppercase font-semibold">de la matriz</span>
-            </div>
-          </div>
-
-          <input type="range" id="sliderSolar" min="0" max="70" step="0.5" value="10" class="text-amber-500 my-2">
-          <div class="flex justify-between text-[11px] text-slate-400 font-medium mb-3">
-            <span>0% (Sin generación distribuida)</span>
-            <span>Rango ideal: 9% – 16%</span>
-            <span>70% (Red saturada sin baterías)</span>
-          </div>
-
-          <!-- Cuadro de Texto Dinámico Solar -->
-          <div id="boxSolar" class="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 text-xs space-y-1.5 transition-all">
-            <div class="flex items-center justify-between font-bold text-amber-950">
-              <span id="titleSolar">Masificación Residencial e Industrial Saludable</span>
-              <span id="impactTagSolar" class="text-[11px] px-2 py-0.5 rounded bg-emerald-200/80 text-emerald-900">ROI 3-5 Años</span>
-            </div>
-            <p id="descSolar" class="text-slate-700 leading-relaxed">
-              Única renovable masificable por usuarios bajo la NTGDR. El 90% opera On-Grid usando la red pública como batería virtual con contador bidireccional (ej. ahorrar Q360/mes en casa o plantas como Finca La Sabana de 2.2 MW con pitch de 2.15 m entre filas y apagado Anti-isla en milisegundos).
-            </p>
-          </div>
-        </div>
-
-        <!-- 3. ENERGÍA EÓLICA -->
-        <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-sm transition-all">
-          <div class="flex items-center justify-between gap-2 mb-2">
-            <div class="flex items-center gap-2.5">
-              <div class="w-9 h-9 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center font-bold">
-                <i data-lucide="wind" class="w-5 h-5"></i>
-              </div>
-              <div>
-                <div class="flex items-center gap-2">
-                  <h3 class="text-sm sm:text-base font-bold text-slate-900">3. Energía Eólica (Inyección al Sistema Nacional)</h3>
-                  <span id="badgeWind" class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-cyan-50 text-cyan-800">Variable Estacional</span>
-                </div>
-                <p class="text-xs text-slate-500">Corredores Venturi >7 m/s • Relevo en época seca (nov–abr) • Palas >60 m</p>
-              </div>
-            </div>
-            <div class="text-right">
-              <span id="valWind" class="text-xl font-black text-cyan-600">6.0%</span>
-              <span class="block text-[10px] text-slate-400 uppercase font-semibold">de la matriz</span>
-            </div>
-          </div>
-
-          <input type="range" id="sliderWind" min="0" max="70" step="0.5" value="6" class="text-cyan-600 my-2">
-          <div class="flex justify-between text-[11px] text-slate-400 font-medium mb-3">
-            <span>0% (~2.2% real: 107 MW)</span>
-            <span>Rango ideal: 8% – 15%</span>
-            <span>70% (Sobrecosto de obra civil)</span>
-          </div>
-
-          <!-- Cuadro de Texto Dinámico Eólica -->
-          <div id="boxWind" class="p-3.5 rounded-xl bg-cyan-50/70 border border-cyan-200 text-xs space-y-1.5 transition-all">
-            <div class="flex items-center justify-between font-bold text-cyan-950">
-              <span id="titleWind">Respaldo de Temporada Seca (Vientos Alisios)</span>
-              <span id="impactTagWind" class="text-[11px] px-2 py-0.5 rounded bg-cyan-200/80 text-cyan-900">Relevo Nov–Abr</span>
-            </div>
-            <p id="descWind" class="text-slate-700 leading-relaxed">
-              Exclusiva para el Sistema Nacional (actualmente ~107 MW en Villa Canales, San Vicente Pacaya y Jutiapa). Alcanza su máxima potencia entre noviembre y abril con los vientos alisios (>7 m/s, potencia proporcional al cubo de la velocidad), haciendo el relevo justo cuando bajan las hidroeléctricas.
-            </p>
-          </div>
-        </div>
-
-        <!-- 4. ENERGÍA GEOTÉRMICA -->
-        <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-sm transition-all">
-          <div class="flex items-center justify-between gap-2 mb-2">
-            <div class="flex items-center gap-2.5">
-              <div class="w-9 h-9 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center font-bold">
-                <i data-lucide="flame" class="w-5 h-5"></i>
-              </div>
-              <div>
-                <div class="flex items-center gap-2">
-                  <h3 class="text-sm sm:text-base font-bold text-slate-900">4. Energía Geotérmica (Ciclo Binario 24/7/365)</h3>
-                  <span id="badgeGeo" class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-rose-50 text-rose-800">Base Pura >85%</span>
-                </div>
-                <p class="text-xs text-slate-500">Potencial 1,000 MW (Zunil/Amatitlán ~49 MW) • Fluidos >150°C • Pozos $4M–$8M</p>
-              </div>
-            </div>
-            <div class="text-right">
-              <span id="valGeo" class="text-xl font-black text-rose-600">6.0%</span>
-              <span class="block text-[10px] text-slate-400 uppercase font-semibold">de la matriz</span>
-            </div>
-          </div>
-
-          <input type="range" id="sliderGeo" min="0" max="70" step="0.5" value="6" class="text-rose-600 my-2">
-          <div class="flex justify-between text-[11px] text-slate-400 font-medium mb-3">
-            <span>0% (~1.7% real: 49 MW)</span>
-            <span>Rango ideal: 7% – 14%</span>
-            <span>70% (Riesgo geológico extremo)</span>
-          </div>
-
-          <!-- Cuadro de Texto Dinámico Geotérmica -->
-          <div id="boxGeo" class="p-3.5 rounded-xl bg-rose-50/70 border border-rose-200 text-xs space-y-1.5 transition-all">
-            <div class="flex items-center justify-between font-bold text-rose-950">
-              <span id="titleGeo">Energía Base Firme 24/7 con Ciclo Binario</span>
-              <span id="impactTagGeo" class="text-[11px] px-2 py-0.5 rounded bg-rose-200/80 text-rose-900">Estabilidad 365 días</span>
-            </div>
-            <p id="descGeo" class="text-slate-700 leading-relaxed">
-              Única renovable que entrega potencia base las 24 horas los 365 días sin depender del clima (factor de planta >85%). Opera con ciclo binario (>150°C en circuito cerrado + reinyección). Crecer demasiado rápido dispara el presupuesto por perforaciones de 2,000 m ($4M–$8M a fondo perdido con 50% de riesgo de pozo seco).
-            </p>
-          </div>
-        </div>
-
-        <!-- Botón de Envío y Evaluación -->
-        <div class="pt-1">
-          <button id="submitBtn" type="button" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 via-blue-600 to-emerald-600 hover:from-indigo-700 hover:via-blue-700 hover:to-emerald-700 active:scale-[0.99] text-white font-bold flex items-center justify-center gap-3 shadow-lg shadow-indigo-500/25 transition-all text-base cursor-pointer">
-            <i data-lucide="cpu" class="w-5 h-5"></i>
-            <span>Enviar y Evaluar Plan Energético Anual (Algoritmo)</span>
-          </button>
-        </div>
-
-      </section>
-
-      <!-- COLUMNA DERECHA: Dashboard de Impacto en Vivo -->
-      <aside class="lg:col-span-5 space-y-4 lg:sticky lg:top-20">
-
-        <!-- Tarjeta Principal de 3 Indicadores Críticos -->
-        <div class="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-sm space-y-5">
-          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-            <div>
-              <h3 class="text-sm font-extrabold uppercase tracking-wider text-slate-800">Monitor del Sistema Nacional</h3>
-              <p class="text-xs text-slate-500">Impacto instantáneo de tus sliders</p>
-            </div>
-            <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">
-              <span class="w-2 h-2 rounded-full bg-indigo-600 animate-ping"></span>
-              En vivo
+    <!-- BARRA DE COMPOSICIÓN DE LA MATRIZ + 3 INDICADORES EN TIEMPO REAL -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+      <!-- Barra apilada del 100% -->
+      <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">
+              Distribución Total de la Matriz Nacional
+            </span>
+            <span id="totalRenewableBadge" class="text-sm font-extrabold text-emerald-400">
+              Renovables: 70.0% | Hidrocarburos: 30.0%
             </span>
           </div>
 
-          <!-- INDICADOR 1: Costo de Presupuesto e Inversión (CAPEX) -->
-          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/70 space-y-2">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                <i data-lucide="landmark" class="w-4 h-4 text-slate-500"></i>
-                1. Presupuesto de Inversión (CAPEX / Obra Civil)
-              </span>
-              <span id="metricBudgetLabel" class="text-xs font-extrabold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">Moderado (42%)</span>
-            </div>
-            <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
-              <div id="barBudget" class="bg-emerald-500 h-2.5 rounded-full transition-all duration-300" style="width: 42%"></div>
-            </div>
-            <p id="explainBudget" class="text-[11px] text-slate-600 leading-normal">
-              Aumenta bruscamente si fuerzas <strong>Geotérmica</strong> (pozos de 2,000m de $4M–$8M con 50% de riesgo seco + reinyección) o <strong>Eólica</strong> (carreteras de montaña para palas >60m + 2 años de anemometría).
-            </p>
+          <!-- Stacked Bar -->
+          <div class="w-full h-6 rounded-xl overflow-hidden flex bg-slate-800 border border-slate-700 p-0.5 gap-0.5">
+            <div id="barHydro" class="bg-sky-400 h-full transition-all duration-150 rounded-l-lg" title="Hidráulica"></div>
+            <div id="barBiomass" class="bg-lime-400 h-full transition-all duration-150" title="Biomasa"></div>
+            <div id="barSolar" class="bg-yellow-400 h-full transition-all duration-150" title="Solar"></div>
+            <div id="barWind" class="bg-teal-400 h-full transition-all duration-150" title="Eólica"></div>
+            <div id="barGeo" class="bg-rose-400 h-full transition-all duration-150" title="Geotérmica"></div>
+            <div id="barFossil" class="bg-amber-600/90 h-full transition-all duration-150 rounded-r-lg" title="Hidrocarburos (Gasolina/Carbón)"></div>
           </div>
 
-          <!-- INDICADOR 2: Costo de la Energía General / Tarifa (OPEX + Hidrocarburos) -->
-          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/70 space-y-2">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                <i data-lucide="receipt" class="w-4 h-4 text-slate-500"></i>
-                2. Costo de Energía General (Tarifa Usuario)
-              </span>
-              <span id="metricTariffLabel" class="text-xs font-extrabold px-2 py-0.5 rounded bg-amber-100 text-amber-800">Q1.68 / kWh</span>
+          <!-- Leyenda -->
+          <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-3 text-xs">
+            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-sky-400"></span><span class="text-slate-300">Hidro: <b id="legHydro">38%</b></span></div>
+            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-lime-400"></span><span class="text-slate-300">Biomasa: <b id="legBiomass">14%</b></span></div>
+            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span><span class="text-slate-300">Solar: <b id="legSolar">11%</b></span></div>
+            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-teal-400"></span><span class="text-slate-300">Eólica: <b id="legWind">3.5%</b></span></div>
+            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-400"></span><span class="text-slate-300">Geo: <b id="legGeo">3.5%</b></span></div>
+            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-600"></span><span class="text-amber-300">Fósil: <b id="legFossil">30%</b></span></div>
+          </div>
+        </div>
+
+        <!-- Radar de Sinergias Activas -->
+        <div class="mt-4 pt-3 border-t border-slate-800">
+          <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+            Sinergias y Relevos Detectados en Vivo:
+          </div>
+          <div id="liveSynergiesContainer" class="flex flex-wrap gap-2"></div>
+        </div>
+      </div>
+
+      <!-- 3 Medidores de Impacto -->
+      <div class="lg:col-span-5 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-3">
+        <!-- Indicador 1: Presupuesto CAPEX -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-bold text-slate-300">💰 Presupuesto de Inversión (CAPEX)</span>
+            <span id="capexLabel" class="font-bold text-emerald-400">Moderado</span>
+          </div>
+          <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden mt-2">
+            <div id="capexBar" class="h-full bg-emerald-500 transition-all duration-200" style="width: 45%"></div>
+          </div>
+          <p id="capexHint" class="text-[11px] text-slate-400 mt-1.5">
+            Obra civil eólica y riesgo geológico geotérmico controlados.
+          </p>
+        </div>
+
+        <!-- Indicador 2: Costo Energía General (Tarifa Q/kWh por Hidrocarburos) -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-bold text-slate-300">⛽ Costo Tarifa Anual (Uso de Hidrocarburos)</span>
+            <span id="tariffLabel" class="font-bold text-emerald-400">Q1.48 / kWh</span>
+          </div>
+          <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden mt-2">
+            <div id="tariffBar" class="h-full bg-emerald-500 transition-all duration-200" style="width: 35%"></div>
+          </div>
+          <p id="tariffHint" class="text-[11px] text-slate-400 mt-1.5">
+            Relevo de época seca evita compras de emergencia de búnker/carbón.
+          </p>
+        </div>
+
+        <!-- Indicador 3: Estabilidad de Cobertura 24/7 -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-bold text-slate-300">⚡ Estabilidad y Cobertura de Red 24/7</span>
+            <span id="stabilityLabel" class="font-bold text-emerald-400">94% Estable</span>
+          </div>
+          <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden mt-2">
+            <div id="stabilityBar" class="h-full bg-emerald-500 transition-all duration-200" style="width: 94%"></div>
+          </div>
+          <p id="stabilityHint" class="text-[11px] text-slate-400 mt-1.5">
+            Respaldo firme suficiente para cubrir la caída solar nocturna.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- LOS 5 SLIDERS + CUADROS DE TEXTO DINÁMICOS -->
+    <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+
+      <!-- 1. HIDRÁULICA -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+        <div>
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-sky-400">Energía Gestionable</span>
+              <h3 class="text-lg font-bold text-white">1. Hidroeléctrica</h3>
             </div>
-            <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
-              <div id="barTariff" class="bg-amber-500 h-2.5 rounded-full transition-all duration-300" style="width: 55%"></div>
+            <div class="text-right">
+              <span id="valHydro" class="text-2xl font-extrabold text-sky-400">38.0%</span>
+              <div id="badgeHydro" class="text-[11px] font-semibold text-emerald-400">Equilibrada</div>
             </div>
-            <p id="explainTariff" class="text-[11px] text-slate-600 leading-normal">
-              Se dispara si dependes demasiado de la <strong>Hidráulica</strong> sin relevo eólico/geotérmico en época seca (nov–abr), obligando a quemar hidrocarburos caros (búnker/carbón). La Solar On-Grid ayuda a ahorrar de día.
-            </p>
           </div>
 
-          <!-- INDICADOR 3: Estabilidad de Cobertura 24/7 -->
-          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/70 space-y-2">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                <i data-lucide="shield-check" class="w-4 h-4 text-slate-500"></i>
-                3. Estabilidad de Cobertura y Continuidad
-              </span>
-              <span id="metricStabilityLabel" class="text-xs font-extrabold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">Estable (84%)</span>
-            </div>
-            <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
-              <div id="barStability" class="bg-emerald-500 h-2.5 rounded-full transition-all duration-300" style="width: 84%"></div>
-            </div>
-            <p id="explainStability" class="text-[11px] text-slate-600 leading-normal">
-              Se desploma si abusas de la <strong>Solar On-Grid</strong> (90% sin baterías + desconexión Anti-isla en milisegundos) o si falta base firme <strong>Geotérmica (24/7)</strong> e <strong>Hidráulica</strong> para cubrir la noche.
-            </p>
-          </div>
-
-          <!-- Balance de Relevo Estacional y Horario -->
-          <div class="pt-2 border-t border-slate-100 space-y-3">
-            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">Simulación de Relevo por Época y Horario</h4>
-
-            <!-- Época Lluviosa -->
-            <div>
-              <div class="flex justify-between text-xs mb-1">
-                <span class="font-medium text-slate-700 flex items-center gap-1.5">
-                  <i data-lucide="cloud-rain" class="w-3.5 h-3.5 text-blue-600"></i>
-                  Época Lluviosa (Mayo – Octubre)
-                </span>
-                <span id="seasonWetVal" class="font-bold text-slate-900">95% Cubierto</span>
-              </div>
-              <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                <div id="barSeasonWet" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 95%"></div>
-              </div>
-            </div>
-
-            <!-- Época Seca / Alisios -->
-            <div>
-              <div class="flex justify-between text-xs mb-1">
-                <span class="font-medium text-slate-700 flex items-center gap-1.5">
-                  <i data-lucide="sun-wind" class="w-3.5 h-3.5 text-cyan-600"></i>
-                  Época Seca + Vientos Alisios (Nov – Abril)
-                </span>
-                <span id="seasonDryVal" class="font-bold text-slate-900">68% Cubierto</span>
-              </div>
-              <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                <div id="barSeasonDry" class="bg-cyan-600 h-2 rounded-full transition-all duration-300" style="width: 68%"></div>
-              </div>
-            </div>
-
-            <!-- Demanda Nocturna -->
-            <div>
-              <div class="flex justify-between text-xs mb-1">
-                <span class="font-medium text-slate-700 flex items-center gap-1.5">
-                  <i data-lucide="moon" class="w-3.5 h-3.5 text-indigo-600"></i>
-                  Demanda Nocturna (Sin Sol / Sin Baterías)
-                </span>
-                <span id="seasonNightVal" class="font-bold text-slate-900">80% Cubierto</span>
-              </div>
-              <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                <div id="barSeasonNight" class="bg-indigo-600 h-2 rounded-full transition-all duration-300" style="width: 80%"></div>
-              </div>
+          <div class="my-4">
+            <input id="sliderHydro" type="range" min="0" max="65" step="0.5" value="38" class="slider-hydro" />
+            <div class="flex justify-between text-[11px] text-slate-500 mt-1">
+              <span>0%</span>
+              <span>Óptimo: 28%–42% (o hasta 55% con relevo)</span>
+              <span>65%</span>
             </div>
           </div>
         </div>
 
-        <!-- Cuadro Resumen Preliminar -->
-        <div id="liveAlertCard" class="p-4 rounded-2xl border bg-amber-50 border-amber-200 text-amber-900 text-xs flex gap-3 items-start shadow-sm transition-all">
-          <i data-lucide="alert-triangle" class="w-5 h-5 flex-shrink-0 mt-0.5 text-amber-600"></i>
-          <div class="space-y-1">
-            <span id="liveAlertTitle" class="font-bold block text-sm">Diagnóstico Preliminar en Vivo</span>
-            <p id="liveAlertText" class="leading-relaxed">
-              Mueve los controles deslizantes para observar las compensaciones entre inversión inicial, tarifa eléctrica por quema de búnker en verano y estabilidad de red.
-            </p>
+        <div id="boxHydro" class="p-3.5 rounded-xl bg-slate-950/90 border border-slate-800 text-xs text-slate-300 space-y-1.5 leading-relaxed">
+        </div>
+      </div>
+
+      <!-- 2. BIOMASA (INGENIOS / AGROINDUSTRIA) -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+        <div>
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-lime-400">Cogeneración Estacional</span>
+              <h3 class="text-lg font-bold text-white">2. Biomasa (Ingenios)</h3>
+            </div>
+            <div class="text-right">
+              <span id="valBiomass" class="text-2xl font-extrabold text-lime-400">14.0%</span>
+              <div id="badgeBiomass" class="text-[11px] font-semibold text-emerald-400">Relevo de Verano</div>
+            </div>
+          </div>
+
+          <div class="my-4">
+            <input id="sliderBiomass" type="range" min="0" max="45" step="0.5" value="14" class="slider-biomass" />
+            <div class="flex justify-between text-[11px] text-slate-500 mt-1">
+              <span>0%</span>
+              <span>Sinergia Hidro/Solar: &gt; 13%</span>
+              <span>45%</span>
+            </div>
           </div>
         </div>
 
-      </aside>
+        <div id="boxBiomass" class="p-3.5 rounded-xl bg-slate-950/90 border border-slate-800 text-xs text-slate-300 space-y-1.5 leading-relaxed">
+        </div>
+      </div>
 
+      <!-- 3. SOLAR FOTOVOLTAICA -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+        <div>
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-yellow-400">Variable • NTGDR On-Grid</span>
+              <h3 class="text-lg font-bold text-white">3. Solar Fotovoltaica</h3>
+            </div>
+            <div class="text-right">
+              <span id="valSolar" class="text-2xl font-extrabold text-yellow-400">11.0%</span>
+              <div id="badgeSolar" class="text-[11px] font-semibold text-emerald-400">ROI 3–5 años</div>
+            </div>
+          </div>
+
+          <div class="my-4">
+            <input id="sliderSolar" type="range" min="0" max="45" step="0.5" value="11" class="slider-solar" />
+            <div class="flex justify-between text-[11px] text-slate-500 mt-1">
+              <span>0%</span>
+              <span>Sin baterías (90% On-Grid)</span>
+              <span>45%</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="boxSolar" class="p-3.5 rounded-xl bg-slate-950/90 border border-slate-800 text-xs text-slate-300 space-y-1.5 leading-relaxed">
+        </div>
+      </div>
+
+      <!-- 4. EÓLICA -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+        <div>
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-teal-400">Sistema Nacional • Alisios</span>
+              <h3 class="text-lg font-bold text-white">4. Energía Eólica</h3>
+            </div>
+            <div class="text-right">
+              <span id="valWind" class="text-2xl font-extrabold text-teal-400">3.5%</span>
+              <div id="badgeWind" class="text-[11px] font-semibold text-emerald-400">Relevo Época Seca</div>
+            </div>
+          </div>
+
+          <div class="my-4">
+            <input id="sliderWind" type="range" min="0" max="35" step="0.5" value="3.5" class="slider-wind" />
+            <div class="flex justify-between text-[11px] text-slate-500 mt-1">
+              <span>0%</span>
+              <span>Sinergia con Hidro: &gt; 3%</span>
+              <span>35%</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="boxWind" class="p-3.5 rounded-xl bg-slate-950/90 border border-slate-800 text-xs text-slate-300 space-y-1.5 leading-relaxed">
+        </div>
+      </div>
+
+      <!-- 5. GEOTÉRMICA -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between md:col-span-2 xl:col-span-2">
+        <div>
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-rose-400">Energía Base Pura 24/7 • Ciclo Binario</span>
+              <h3 class="text-lg font-bold text-white">5. Energía Geotérmica (Arco Volcánico)</h3>
+            </div>
+            <div class="text-right">
+              <span id="valGeo" class="text-2xl font-extrabold text-rose-400">3.5%</span>
+              <div id="badgeGeo" class="text-[11px] font-semibold text-emerald-400">Firme 365 días</div>
+            </div>
+          </div>
+
+          <div class="my-4">
+            <input id="sliderGeo" type="range" min="0" max="35" step="0.5" value="3.5" class="slider-geo" />
+            <div class="flex justify-between text-[11px] text-slate-500 mt-1">
+              <span>0%</span>
+              <span>Factor de planta &gt; 85% (Respaldo nocturno ideal ≥ 4%)</span>
+              <span>35%</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="boxGeo" class="p-3.5 rounded-xl bg-slate-950/90 border border-slate-800 text-xs text-slate-300 space-y-1.5 leading-relaxed">
+        </div>
+      </div>
+
+    </section>
+
+    <!-- BOTÓN DE ENVIAR Y EVALUAR -->
+    <div class="flex justify-center pt-2">
+      <button id="evaluateBtn" onclick="evaluatePlan()" class="px-8 py-4 rounded-2xl font-extrabold text-base bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 shadow-lg shadow-emerald-500/20 transition transform hover:-translate-y-0.5 cursor-pointer">
+        📊 Enviar y Evaluar Plan Energético Anual
+      </button>
     </div>
 
-    <!-- ===================================================================== -->
-    <!-- SECCIÓN DE RESULTADOS PROFUNDOS (Se despliega al pulsar "Enviar")      -->
-    <!-- ===================================================================== -->
-    <section id="resultsSection" class="hidden pt-4 transition-all duration-500">
-      <div class="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden">
-
-        <!-- Cabecera del Dictamen Anual -->
-        <div id="verdictHeader" class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 sm:p-8">
-          <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div class="space-y-2 max-w-3xl">
-              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-white/10 text-emerald-300 border border-white/15">
-                <i data-lucide="activity" class="w-3.5 h-3.5"></i>
-                Auditoría Anual del Sistema Eléctrico Guatemalteco
-              </div>
-              <h2 id="verdictTitle" class="text-2xl sm:text-3xl font-black tracking-tight">
-                Dictamen del Plan Energético a 12 Meses
-              </h2>
-              <p id="verdictSubtitle" class="text-sm text-slate-300 leading-relaxed">
-                Evaluación integral más allá de los cuadros de control: simulación de estiaje, viabilidad logística, riesgo geológico y comportamiento de red On-Grid.
-              </p>
-            </div>
-
-            <!-- Puntaje Global -->
-            <div class="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4 text-center min-w-[160px]">
-              <span class="text-[11px] uppercase tracking-wider text-slate-300 font-semibold block">Índice de Equilibrio</span>
-              <div id="verdictScore" class="text-4xl font-black text-emerald-400 my-1">86/100</div>
-              <span id="verdictBadge" class="inline-block text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-200">
-                Plan Viable
-              </span>
-            </div>
+    <!-- PANEL DE RESULTADOS AL ENVIAR (SIN RECOMENDACIÓN NI DEBATE) -->
+    <section id="resultsSection" class="hidden space-y-6 pt-4">
+      <div id="verdictBanner" class="rounded-2xl p-6 border">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <span id="verdictTag" class="px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider"></span>
+            <h2 id="verdictTitle" class="text-2xl font-extrabold text-white mt-2"></h2>
+            <p id="verdictSummary" class="text-sm text-slate-300 mt-1"></p>
+          </div>
+          <div class="bg-slate-950/70 border border-slate-800 rounded-2xl px-5 py-4 text-center shrink-0">
+            <div class="text-xs uppercase font-bold text-slate-400">Índice de Viabilidad Anual</div>
+            <div id="verdictScore" class="text-4xl font-extrabold text-white mt-1">0/100</div>
           </div>
         </div>
+      </div>
 
-        <!-- Tarjetas de Resumen Cuantitativo (Más allá de los cuadros básicos) -->
-        <div class="p-6 sm:p-8 bg-slate-50 border-b border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm">
-            <span class="text-xs font-semibold text-slate-500 block">Quema de Hidrocarburos en Verano</span>
-            <div id="resFossilSpike" class="text-2xl font-black text-slate-900 mt-1">+14.2%</div>
-            <p id="resFossilNote" class="text-xs text-slate-500 mt-1">Búnker/carbón requerido entre nov y abr</p>
-          </div>
+      <!-- SIMULACIÓN DE LOS 4 TRIMESTRES DEL AÑO EN GUATEMALA -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+        <h3 class="text-sm font-extrabold uppercase tracking-wider text-slate-300 mb-4">
+          📅 Comportamiento del Plan durante los 4 Trimestres del Año
+        </h3>
+        <div id="quartersGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+      </div>
 
-          <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm">
-            <span class="text-xs font-semibold text-slate-500 block">Riesgo Exploratorio y Obra Civil</span>
-            <div id="resCapexDollars" class="text-2xl font-black text-indigo-600 mt-1">$420 M</div>
-            <p id="resCapexNote" class="text-xs text-slate-500 mt-1">Pozos geotérmicos ($4M-$8M) + grúas eólicas</p>
-          </div>
-
-          <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm">
-            <span class="text-xs font-semibold text-slate-500 block">Riesgo de Disparo Anti-Isla / Apagón</span>
-            <div id="resBlackoutProb" class="text-2xl font-black text-emerald-600 mt-1">Bajo (8%)</div>
-            <p id="resBlackoutNote" class="text-xs text-slate-500 mt-1">Intermitencia On-Grid sin baterías a las 18:00h</p>
-          </div>
-
-          <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm">
-            <span class="text-xs font-semibold text-slate-500 block">Tarifa Promedio Anual Resultante</span>
-            <div id="resFinalTariff" class="text-2xl font-black text-amber-600 mt-1">Q1.54 / kWh</div>
-            <p id="resTariffNote" class="text-xs text-slate-500 mt-1">Referencia base residencial: Q1.50 / kWh</p>
-          </div>
-        </div>
-
-        <!-- Cuerpo del Informe: Análisis de Flancos + Simulación Trimestral -->
-        <div class="p-6 sm:p-8 space-y-8">
-
-          <!-- 1. ¿Dónde flanquea o triunfa tu plan? -->
-          <div class="space-y-4">
-            <h3 class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
-              <i data-lucide="locate-fixed" class="w-5 h-5 text-indigo-600"></i>
-              <span>Diagnóstico de Flancos (¿Por qué triunfa o flanquea tu configuración?)</span>
-            </h3>
-            <div id="flanksContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <!-- Generado dinámicamente por JS -->
-            </div>
-          </div>
-
-          <!-- 2. Simulación Cronológica de los 4 Trimestres en Guatemala -->
-          <div class="space-y-4">
-            <h3 class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
-              <i data-lucide="calendar-clock" class="w-5 h-5 text-indigo-600"></i>
-              <span>Comportamiento Trimestral de tu Matriz Durante el Año</span>
-            </h3>
-            <div id="quartersContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <!-- Generado dinámicamente por JS -->
-            </div>
-          </div>
-
-          <!-- 3. Recomendación de Ingeniería (Diapositiva 31 a 35) y Pregunta de Clase -->
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-2">
-            <div class="lg:col-span-7 bg-indigo-50/70 border border-indigo-200 rounded-2xl p-5 space-y-2">
-              <h4 class="text-sm font-extrabold text-indigo-950 flex items-center gap-2">
-                <i data-lucide="wrench" class="w-4 h-4 text-indigo-600"></i>
-                Recomendación de Ingeniería para tu Portafolio Híbrido
-              </h4>
-              <p id="engineeringAdvice" class="text-xs sm:text-sm text-indigo-950/90 leading-relaxed"></p>
-              <div class="pt-2 flex flex-wrap gap-2 text-[11px] font-semibold text-indigo-800">
-                <span class="px-2.5 py-1 rounded-lg bg-white border border-indigo-200">Vivienda: Solar On-Grid (ROI 3–5 años)</span>
-                <span class="px-2.5 py-1 rounded-lg bg-white border border-indigo-200">Agroindustria: Cogeneración Biomasa</span>
-                <span class="px-2.5 py-1 rounded-lg bg-white border border-indigo-200">Red Nacional: Base Geotérmica + Relevo Eólico/Hidro</span>
-              </div>
-            </div>
-
-            <div class="lg:col-span-5 bg-slate-900 text-white rounded-2xl p-5 flex flex-col justify-between space-y-4">
-              <div class="space-y-2">
-                <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-                  <i data-lucide="message-Square" class="w-3.5 h-3.5"></i>
-                  Debate en Clase
-                </span>
-                <p id="classroomQuestion" class="text-xs sm:text-sm text-slate-200 italic leading-relaxed"></p>
-              </div>
-              <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
-                <button id="adjustAgainBtn" type="button" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition flex items-center gap-1.5">
-                  <i data-lucide="arrow-up" class="w-3.5 h-3.5"></i>
-                  Modificar Sliders
-                </button>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
+      <!-- DIAGNÓSTICO DE PUNTOS FUERTES, COMPENSACIONES Y FLAQUEZAS -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+        <h3 class="text-sm font-extrabold uppercase tracking-wider text-slate-300 mb-4">
+          🔍 Diagnóstico Técnico y Financiero del Algoritmo
+        </h3>
+        <div id="diagnosticsList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
       </div>
     </section>
 
   </main>
 
-  <!-- Footer -->
-  <footer class="bg-white border-t border-slate-200 py-5 mt-10 text-xs text-slate-500">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
-      <span>Basado en el Guion Técnico de Energías Renovables en Guatemala (NTGDR, SNI, Ciclo Binario y Portafolio Híbrido)</span>
-      <span class="font-medium text-slate-600">Simulador 100% Client-Side para Dinámica en Línea</span>
-    </div>
-  </footer>
-
   <script>
-    lucide.createIcons();
+    const state = {
+      hydro: 38.0,
+      biomass: 14.0,
+      solar: 11.0,
+      wind: 3.5,
+      geo: 3.5
+    };
 
-    // Referencias a los 4 Sliders
+    const keys = ['hydro', 'biomass', 'solar', 'wind', 'geo'];
+    const TARGET_RENEWABLE = 70.0;
+
     const sliders = {
       hydro: document.getElementById('sliderHydro'),
+      biomass: document.getElementById('sliderBiomass'),
       solar: document.getElementById('sliderSolar'),
       wind: document.getElementById('sliderWind'),
       geo: document.getElementById('sliderGeo')
     };
 
-    const autoBalanceToggle = document.getElementById('autoBalanceToggle');
-    const normalizeBtn = document.getElementById('normalizeBtn');
-    const TARGET_TOTAL = 70.0;
+    keys.forEach(changedKey => {
+      sliders[changedKey].addEventListener('input', (e) => {
+        const newVal = parseFloat(e.target.value);
+        handleSliderChange(changedKey, newVal);
+      });
+    });
 
-    // Estado actual en números flotantes
-    let state = {
-      hydro: 48.0,
-      solar: 10.0,
-      wind: 6.0,
-      geo: 6.0
-    };
+    document.getElementById('autoBalanceToggle').addEventListener('change', (e) => {
+      if (e.target.checked) {
+        handleSliderChange('hydro', state.hydro);
+      } else {
+        updateUI();
+      }
+    });
 
-    // Escenarios preconfigurados para la clase (Suman 70.0%)
-    const presets = {
-      real:      { hydro: 52.0, solar: 9.0,  wind: 5.0,  geo: 4.0  },
-      hidro:     { hydro: 58.0, solar: 6.0,  wind: 3.0,  geo: 3.0  },
-      solar:     { hydro: 25.0, solar: 33.0, wind: 6.0,  geo: 6.0  },
-      geoeolica: { hydro: 16.0, solar: 8.0,  wind: 23.0, geo: 23.0 },
-      optimo:    { hydro: 32.0, solar: 13.5, wind: 13.0, geo: 11.5 }
-    };
+    function handleSliderChange(changedKey, newVal) {
+      const autoBalance = document.getElementById('autoBalanceToggle').checked;
 
-    // Función para auto-equilibrar los otros 3 sliders cuando el usuario mueve 1
-    function handleSliderChange(changedKey, newValue) {
-      newValue = Math.max(0, Math.min(TARGET_TOTAL, parseFloat(newValue)));
-      state[changedKey] = newValue;
+      if (autoBalance) {
+        const clampedVal = Math.min(newVal, TARGET_RENEWABLE);
+        state[changedKey] = clampedVal;
+        const remainingTarget = Math.max(0, TARGET_RENEWABLE - clampedVal);
 
-      if (autoBalanceToggle.checked) {
-        const otherKeys = Object.keys(state).filter(k => k !== changedKey);
-        const remainingTarget = Math.max(0, TARGET_TOTAL - newValue);
-        const currentOthersSum = otherKeys.reduce((acc, k) => acc + state[k], 0);
+        const otherKeys = keys.filter(k => k !== changedKey);
+        const otherSum = otherKeys.reduce((acc, k) => acc + state[k], 0);
 
-        if (currentOthersSum > 0.01) {
+        if (otherSum > 0) {
           otherKeys.forEach(k => {
-            state[k] = Math.round(((state[k] / currentOthersSum) * remainingTarget) * 2) / 2;
+            state[k] = Math.max(0, (state[k] / otherSum) * remainingTarget);
           });
         } else {
-          const split = Math.round((remainingTarget / 3) * 2) / 2;
-          otherKeys.forEach(k => { state[k] = split; });
+          const equalShare = remainingTarget / otherKeys.length;
+          otherKeys.forEach(k => {
+            state[k] = equalShare;
+          });
         }
 
-        // Corregir redondeo decimal para que sume exactamente 70.0%
-        const sumAfterRound = Object.values(state).reduce((a, b) => a + b, 0);
-        const diff = Math.round((TARGET_TOTAL - sumAfterRound) * 10) / 10;
-        if (Math.abs(diff) > 0.01) {
-          // Aplicar diferencia al mayor de los otros sliders
-          const largestOther = otherKeys.reduce((a, b) => state[a] >= state[b] ? a : b);
-          state[largestOther] = Math.max(0, Math.round((state[largestOther] + diff) * 10) / 10);
-        }
-
-        // Sincronizar inputs DOM
-        Object.keys(sliders).forEach(k => {
-          sliders[k].value = state[k];
+        // Ajuste fino de redondeo a 0.1%
+        keys.forEach(k => {
+          state[k] = Math.round(state[k] * 10) / 10;
         });
+        const diff = Math.round((TARGET_RENEWABLE - keys.reduce((a, k) => a + state[k], 0)) * 10) / 10;
+        const adjustKey = otherKeys.find(k => state[k] + diff >= 0) || changedKey;
+        state[adjustKey] = Math.round((state[adjustKey] + diff) * 10) / 10;
+      } else {
+        state[changedKey] = Math.round(newVal * 10) / 10;
       }
 
-      updateAllUI();
+      keys.forEach(k => {
+        sliders[k].value = state[k];
+      });
+
+      updateUI();
     }
 
-    // Cálculo central de métricas del sistema eléctrico guatemalteco
+    function applyPreset(hydro, biomass, solar, wind, geo) {
+      state.hydro = hydro;
+      state.biomass = biomass;
+      state.solar = solar;
+      state.wind = wind;
+      state.geo = geo;
+      keys.forEach(k => {
+        sliders[k].value = state[k];
+      });
+      updateUI();
+      if (!document.getElementById('resultsSection').classList.contains('hidden')) {
+        evaluatePlan();
+      }
+    }
+
     function calculateMetrics() {
       const h = state.hydro;
+      const b = state.biomass;
       const s = state.solar;
       const w = state.wind;
       const g = state.geo;
-      const totalRen = Math.round((h + s + w + g) * 10) / 10;
 
-      // 1. COSTO DE PRESUPUESTO E INVERSIÓN (CAPEX: 0 a 100%)
-      // Geotérmica: pozos de 2,000 m ($4M-$8M a fondo perdido, 50% prob seco + pozos reinyección)
-      // Eólica: 1-2 años anemometría + carreteras montaña para palas >60 m + grúas alto tonelaje + licencias aves
-      // Solar: muy bajo para el Estado (inversión privada en techos On-Grid NTGDR)
-      const geoCapexPenalty = g > 12 ? Math.pow(g - 12, 1.45) * 2.6 : g * 1.4;
-      const windCapexPenalty = w > 13 ? Math.pow(w - 13, 1.38) * 2.1 : w * 1.25;
-      const hydroCapex = h * 0.48;
-      const solarCapex = s * 0.18;
+      const totalRen = Math.round((h + b + s + w + g) * 10) / 10;
+      const baseFossil = Math.max(0, Math.round((100 - totalRen) * 10) / 10);
 
-      const budgetScore = Math.min(100, Math.max(8, Math.round(10 + geoCapexPenalty + windCapexPenalty + hydroCapex + solarCapex)));
-      const estimatedMillions = Math.round(140 + (geoCapexPenalty * 14) + (windCapexPenalty * 10) + (hydroCapex * 4));
+      // SINERGIAS CLAVE:
+      // 1. Relevo de Época Seca para Hidroeléctrica alta: Eólica > 3% o Biomasa > 13%
+      const hasDrySeasonRelief = (w > 3.0) || (b > 13.0);
+      const hasDoubleDryRelief = (w > 3.0) && (b > 13.0);
 
-      // 2. DÉFICIT DE ÉPOCA SECA Y COSTO DE LA ENERGÍA GENERAL (TARIFA Q/kWh)
-      // En época seca (nov-abr), los embalses hidroeléctricos caen al ~42% de su capacidad nominal.
-      // El relevo natural lo hacen los vientos alisios (Eólica al 125% en nov-abr) y la Geotérmica (100% firme 24/7).
-      const drySeasonHydroOutput = h * 0.44;
-      const drySeasonWindRelief = w * 1.28;
-      const drySeasonGeoBase = g * 1.05;
-      const drySeasonSolar = s * 0.72; // Bueno de día, pero 0 de noche
+      // 2. Respaldo Nocturno / Anti-isla para Solar alta (> 16%): Geotérmica >= 4% o Biomasa >= 13% o Hidro >= 28%
+      const firmSupportCount = (g >= 4.0 ? 1 : 0) + (b >= 13.0 ? 1 : 0) + (h >= 28.0 ? 1 : 0);
+      const hasSolarBackup = firmSupportCount >= 2 || g >= 5.5;
 
-      const drySeasonEffective = drySeasonHydroOutput + drySeasonWindRelief + drySeasonGeoBase + drySeasonSolar;
-      // Si Hidráulica es muy alta y falta relevo Eólico + Geotérmico, hay que quemar Búnker/Carbón caro
-      const hydroOverdependenceGap = Math.max(0, (h - 33) * 1.15 - (w * 0.85 + g * 0.95));
-      const missingRenewableGap = Math.max(0, TARGET_TOTAL - totalRen);
-      const fossilBurnExtraPct = Math.max(0, Math.round((hydroOverdependenceGap + missingRenewableGap * 0.9 + Math.max(0, 50 - drySeasonEffective) * 0.6) * 10) / 10);
+      // 3. Amortiguador financiero (CAPEX) para Eólica/Geotérmica altas: Solar >= 10% (ROI rápido 3-5 años) o Biomasa >= 12%
+      const hasCapexBuffer = (s >= 10.0) || (b >= 12.0);
 
-      // Ahorro diurno solar NTGDR vs sobrecosto de amortización CAPEX extremo
-      const solarTariffRelief = Math.min(14, s * 0.8) * 0.012;
-      const capexAmortizationAdder = Math.max(0, budgetScore - 60) * 0.008;
-      const tariffQuetzales = Math.max(1.22, Math.min(2.65, 1.38 + (fossilBurnExtraPct * 0.032) + capexAmortizationAdder - solarTariffRelief));
-      const tariffScore = Math.min(100, Math.max(10, Math.round(((tariffQuetzales - 1.20) / 1.35) * 100)));
+      // CÁLCULO DE TARIFA / SOBRECOSTO POR HIDROCARBUROS EN ÉPOCA SECA
+      let drySeasonFossilSpike = 0;
+      if (h > 38) {
+        const excessHydro = h - 38;
+        if (hasDoubleDryRelief) {
+          drySeasonFossilSpike = 0; // Totalmente cubierto por alisios + zafra
+        } else if (hasDrySeasonRelief) {
+          // Si tiene >3% eólica o >13% biomasa, incluso con 52% de hidro es viable
+          drySeasonFossilSpike = Math.max(0, (excessHydro - 16) * 0.4);
+        } else {
+          // Sin relevo eólico ni biomasa: se dispara la quema de búnker/carbón en verano
+          drySeasonFossilSpike = excessHydro * 1.35;
+        }
+      }
 
-      // 3. ESTABILIDAD DE COBERTURA Y CONTINUIDAD 24/7 (0 a 100%)
-      // Solar > 16% sin baterías (90% On-Grid) + desconexión Anti-isla en milisegundos crea inestabilidad severa al atardecer
-      const solarUnbufferedPenalty = s > 15 ? Math.pow(s - 15, 1.42) * 2.3 : 0;
-      // Eólica excesiva (>18%) sufre por variaciones en velocidad del viento (potencia proporcional al cubo v^3)
-      const windCubicPenalty = w > 18 ? (w - 18) * 1.6 : 0;
-      // Falta de base firme nocturna (Geotérmica 24/7 + Hidráulica con embalse)
-      const firmBasePower = g * 2.2 + Math.min(36, h) * 1.15;
-      const firmDeficitPenalty = Math.max(0, 48 - firmBasePower) * 1.4;
-      const totalDeviationPenalty = Math.abs(TARGET_TOTAL - totalRen) * 2.2;
+      // Si el usuario bajó el total de renovables de 70%, el resto lo cubren hidrocarburos
+      const deficitRen = Math.max(0, 68 - totalRen);
+      const effectiveFossilDependence = Math.min(100, Math.round((baseFossil + drySeasonFossilSpike * 0.6 + deficitRen * 0.5) * 10) / 10);
 
-      const stabilityScore = Math.max(12, Math.min(98, Math.round(96 - solarUnbufferedPenalty - windCubicPenalty - firmDeficitPenalty - totalDeviationPenalty)));
+      const tariffQ = (1.38 + (drySeasonFossilSpike * 0.025) + (deficitRen * 0.022)).toFixed(2);
+      const tariffStress = Math.min(100, Math.round(25 + drySeasonFossilSpike * 2.8 + deficitRen * 2.2));
 
-      // Coberturas por época y horario
-      const wetCoverage = Math.min(100, Math.max(20, Math.round((h * 1.15 + s * 0.75 + w * 0.65 + g * 1.1) * (100 / 62))));
-      const dryCoverage = Math.min(100, Math.max(18, Math.round(100 - fossilBurnExtraPct * 2.1 - Math.max(0, s - 22) * 1.2)));
-      const nightCoverage = Math.min(100, Math.max(15, Math.round((g * 2.4 + Math.min(38, h) * 1.25 + w * 1.1) * 1.25 - Math.max(0, s - 16) * 1.8)));
+      // CÁLCULO DE PRESUPUESTO (CAPEX)
+      // Geotérmica ($4M-$8M por pozo con 50% de riesgo seco) y Eólica (palas >60m en montaña) son las más caras en CAPEX
+      let rawCapex = (g * 3.1) + (w * 2.4) + (h * 0.75) + (b * 0.65) + (s * 0.45);
+      if ((g > 10 || w > 12) && hasCapexBuffer) {
+        rawCapex -= 12; // Amortiguado por inversión privada solar/agroindustrial
+      }
+      const capexScore = Math.min(100, Math.max(15, Math.round(rawCapex)));
+
+      // CÁLCULO DE ESTABILIDAD DE COBERTURA 24/7
+      let stability = 92;
+      if (s > 16) {
+        const excessSolar = s - 16;
+        if (hasSolarBackup) {
+          stability -= Math.max(0, (excessSolar - 8) * 1.1);
+        } else {
+          stability -= excessSolar * 2.3;
+        }
+      }
+      if (g >= 3.5) stability += 4;
+      if (b >= 12) stability += 3;
+      if (h < 18) stability -= (18 - h) * 1.4;
+      if (totalRen < 65) stability -= (65 - totalRen) * 1.5;
+      stability = Math.min(99, Math.max(25, Math.round(stability)));
 
       return {
-        h, s, w, g, totalRen,
-        budgetScore,
-        estimatedMillions,
-        fossilBurnExtraPct,
-        tariffQuetzales,
-        tariffScore,
-        stabilityScore,
-        wetCoverage,
-        dryCoverage,
-        nightCoverage
+        totalRen,
+        baseFossil,
+        effectiveFossilDependence,
+        drySeasonFossilSpike,
+        hasDrySeasonRelief,
+        hasDoubleDryRelief,
+        hasSolarBackup,
+        hasCapexBuffer,
+        tariffQ,
+        tariffStress,
+        capexScore,
+        stability
       };
     }
 
-    // Actualiza toda la interfaz en tiempo real al mover cualquier slider
-    function updateAllUI() {
+    function updateUI() {
       const m = calculateMetrics();
+      const { hydro: h, biomass: b, solar: s, wind: w, geo: g } = state;
 
-      // 1. Textos de porcentaje en sliders y leyenda
-      document.getElementById('valHydro').textContent = `${m.h.toFixed(1)}%`;
-      document.getElementById('valSolar').textContent = `${m.s.toFixed(1)}%`;
-      document.getElementById('valWind').textContent = `${m.w.toFixed(1)}%`;
-      document.getElementById('valGeo').textContent = `${m.g.toFixed(1)}%`;
+      // Valores numéricos
+      document.getElementById('valHydro').textContent = `${h.toFixed(1)}%`;
+      document.getElementById('valBiomass').textContent = `${b.toFixed(1)}%`;
+      document.getElementById('valSolar').textContent = `${s.toFixed(1)}%`;
+      document.getElementById('valWind').textContent = `${w.toFixed(1)}%`;
+      document.getElementById('valGeo').textContent = `${g.toFixed(1)}%`;
 
-      document.getElementById('legendHydro').textContent = `${m.h.toFixed(1)}%`;
-      document.getElementById('legendSolar').textContent = `${m.s.toFixed(1)}%`;
-      document.getElementById('legendWind').textContent = `${m.w.toFixed(1)}%`;
-      document.getElementById('legendGeo').textContent = `${m.g.toFixed(1)}%`;
-      const otherPct = Math.max(0, 100 - m.totalRen);
-      document.getElementById('legendOther').textContent = `${otherPct.toFixed(1)}%`;
+      // Bloque superior de Hidrocarburos
+      const fossilEl = document.getElementById('fossilShareText');
+      const fossilBadge = document.getElementById('fossilStateBadge');
+      const hydrocarbonBox = document.getElementById('hydrocarbonBox');
+      fossilEl.textContent = `${m.effectiveFossilDependence.toFixed(1)}%`;
 
-      // Barra apilada superior
-      document.getElementById('stackHydro').style.width = `${Math.min(100, m.h)}%`;
-      document.getElementById('stackSolar').style.width = `${Math.min(100, m.s)}%`;
-      document.getElementById('stackWind').style.width = `${Math.min(100, m.w)}%`;
-      document.getElementById('stackGeo').style.width = `${Math.min(100, m.g)}%`;
-
-      const totalBadge = document.getElementById('totalRenewableBadge');
-      const diffFrom70 = Math.abs(m.totalRen - TARGET_TOTAL);
-      if (diffFrom70 <= 0.5) {
-        totalBadge.textContent = `${m.totalRen.toFixed(1)}% / 70.0% Meta Exacta`;
-        totalBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800";
-        normalizeBtn.classList.add('hidden');
+      if (m.drySeasonFossilSpike > 6 || m.totalRen < 64) {
+        hydrocarbonBox.className = 'px-4 py-2.5 rounded-xl bg-rose-950/70 border border-rose-500/60 flex items-center gap-3';
+        fossilBadge.className = 'text-xs font-bold text-rose-300';
+        fossilBadge.textContent = '¡Sobrecosto por quema en época seca!';
       } else {
-        totalBadge.textContent = `${m.totalRen.toFixed(1)}% (Desviado de la meta 70%)`;
-        totalBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-rose-100 text-rose-800";
-        normalizeBtn.classList.remove('hidden');
+        hydrocarbonBox.className = 'px-4 py-2.5 rounded-xl bg-amber-950/50 border border-amber-500/40 flex items-center gap-3';
+        fossilBadge.className = 'text-xs font-semibold text-amber-300';
+        fossilBadge.textContent = 'Respaldo térmico controlado';
       }
 
-      // 2. Cuadro de Texto Dinámico 1: HIDRÁULICA
+      // Barra apilada
+      document.getElementById('barHydro').style.width = `${h}%`;
+      document.getElementById('barBiomass').style.width = `${b}%`;
+      document.getElementById('barSolar').style.width = `${s}%`;
+      document.getElementById('barWind').style.width = `${w}%`;
+      document.getElementById('barGeo').style.width = `${g}%`;
+      document.getElementById('barFossil').style.width = `${m.baseFossil}%`;
+
+      document.getElementById('legHydro').textContent = `${h.toFixed(1)}%`;
+      document.getElementById('legBiomass').textContent = `${b.toFixed(1)}%`;
+      document.getElementById('legSolar').textContent = `${s.toFixed(1)}%`;
+      document.getElementById('legWind').textContent = `${w.toFixed(1)}%`;
+      document.getElementById('legGeo').textContent = `${g.toFixed(1)}%`;
+      document.getElementById('legFossil').textContent = `${m.baseFossil.toFixed(1)}%`;
+
+      document.getElementById('totalRenewableBadge').textContent =
+        `Renovables: ${m.totalRen.toFixed(1)}% | Hidrocarburos Base: ${m.baseFossil.toFixed(1)}%`;
+
+      // Indicador 1: CAPEX
+      const capexBar = document.getElementById('capexBar');
+      const capexLabel = document.getElementById('capexLabel');
+      const capexHint = document.getElementById('capexHint');
+      capexBar.style.width = `${m.capexScore}%`;
+      if (m.capexScore <= 58) {
+        capexBar.className = 'h-full bg-emerald-500 transition-all duration-200';
+        capexLabel.className = 'font-bold text-emerald-400';
+        capexLabel.textContent = `Viable (${m.capexScore}/100)`;
+        capexHint.textContent = 'Inversión equilibrada entre obra civil pública y capital privado.';
+      } else if (m.capexScore <= 75) {
+        capexBar.className = 'h-full bg-amber-400 transition-all duration-200';
+        capexLabel.className = 'font-bold text-amber-300';
+        capexLabel.textContent = `Elevado (${m.capexScore}/100)`;
+        capexHint.textContent = 'Alto costo por logística eólica (>60m) o exploración geotérmica ($4M-$8M/pozo).';
+      } else {
+        capexBar.className = 'h-full bg-rose-500 transition-all duration-200';
+        capexLabel.className = 'font-bold text-rose-400';
+        capexLabel.textContent = `Crítico (${m.capexScore}/100)`;
+        capexHint.textContent = 'Presupuesto desbordado por perforación a fondo perdido y obra civil de montaña.';
+      }
+
+      // Indicador 2: Tarifa / Hidrocarburos
+      const tariffBar = document.getElementById('tariffBar');
+      const tariffLabel = document.getElementById('tariffLabel');
+      const tariffHint = document.getElementById('tariffHint');
+      tariffBar.style.width = `${m.tariffStress}%`;
+      tariffLabel.textContent = `Q${m.tariffQ} / kWh`;
+      if (m.tariffStress <= 45) {
+        tariffBar.className = 'h-full bg-emerald-500 transition-all duration-200';
+        tariffLabel.className = 'font-bold text-emerald-400';
+        tariffHint.textContent = 'Época seca cubierta con relevo renovable sin disparar hidrocarburos.';
+      } else if (m.tariffStress <= 68) {
+        tariffBar.className = 'h-full bg-amber-400 transition-all duration-200';
+        tariffLabel.className = 'font-bold text-amber-300';
+        tariffHint.textContent = 'En verano (nov–abr) se requiere encender térmicas de carbón/búnker adicionales.';
+      } else {
+        tariffBar.className = 'h-full bg-rose-500 transition-all duration-200';
+        tariffLabel.className = 'font-bold text-rose-400';
+        tariffHint.textContent = '¡Alerta! Sequía estacional sin relevo eólico ni biomasa dispara compra de hidrocarburos.';
+      }
+
+      // Indicador 3: Estabilidad
+      const stabilityBar = document.getElementById('stabilityBar');
+      const stabilityLabel = document.getElementById('stabilityLabel');
+      const stabilityHint = document.getElementById('stabilityHint');
+      stabilityBar.style.width = `${m.stability}%`;
+      stabilityLabel.textContent = `${m.stability}% Estable`;
+      if (m.stability >= 80) {
+        stabilityBar.className = 'h-full bg-emerald-500 transition-all duration-200';
+        stabilityLabel.className = 'font-bold text-emerald-400';
+        stabilityHint.textContent = 'Cobertura nocturna y protección Anti-isla respaldadas por base firme.';
+      } else if (m.stability >= 65) {
+        stabilityBar.className = 'h-full bg-amber-400 transition-all duration-200';
+        stabilityLabel.className = 'font-bold text-amber-300';
+        stabilityHint.textContent = 'Intermitencia al caer el sol (6:00 PM); requiere más geotermia, hidro o biomasa.';
+      } else {
+        stabilityBar.className = 'h-full bg-rose-500 transition-all duration-200';
+        stabilityLabel.className = 'font-bold text-rose-400';
+        stabilityHint.textContent = '¡Riesgo de apagón! Exceso solar On-Grid sin baterías ni respaldo firme nocturno.';
+      }
+
+      // Etiquetas de Sinergias en Vivo
+      renderLiveSynergies(m);
+
+      // Cuadros de texto dinámicos por cada tecnología
+      renderDynamicBoxes(m);
+    }
+
+    function renderLiveSynergies(m) {
+      const container = document.getElementById('liveSynergiesContainer');
+      const badges = [];
+      const { hydro: h, biomass: b, solar: s, wind: w, geo: g } = state;
+
+      if (h > 38 && w > 3.0) {
+        badges.push(`<span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">✅ Sinergia Activa: Eólica (${w.toFixed(1)}% &gt; 3%) releva a la Hidroeléctrica (${h.toFixed(1)}%) con vientos alisios en época seca</span>`);
+      }
+      if (h > 38 && b > 13.0) {
+        badges.push(`<span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-lime-500/15 text-lime-300 border border-lime-500/30">✅ Sinergia Activa: Zafra de Biomasa (${b.toFixed(1)}% &gt; 13%) sostiene a la Hidroeléctrica (${h.toFixed(1)}%) en verano</span>`);
+      }
+      if (h > 38 && w <= 3.0 && b <= 13.0) {
+        badges.push(`<span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-rose-500/15 text-rose-300 border border-rose-500/30">⚠️ Hidroeléctrica alta (${h.toFixed(1)}%) sin relevo: Sube Eólica &gt; 3% o Biomasa &gt; 13% para evitar quemar hidrocarburos</span>`);
+      }
+      if (s > 16 && m.hasSolarBackup) {
+        badges.push(`<span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-yellow-500/15 text-yellow-300 border border-yellow-500/30">✅ Sinergia Activa: Alta Solar On-Grid (${s.toFixed(1)}%) respaldada de noche por base Geotérmica/Biomasa/Hidro</span>`);
+      }
+      if (s > 16 && !m.hasSolarBackup) {
+        badges.push(`<span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-rose-500/15 text-rose-300 border border-rose-500/30">⚠️ Solar alta (${s.toFixed(1)}%) sin baterías: Sube Geotérmica (≥4%) o Biomasa (≥13%) para cubrir las 6:00 PM</span>`);
+      }
+      if ((g > 10 || w > 12) && m.hasCapexBuffer) {
+        badges.push(`<span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-sky-500/15 text-sky-300 border border-sky-500/30">✅ Sinergia Financiera: Alto CAPEX Eólico/Geotérmico amortiguado por inversión privada Solar/Agroindustrial</span>`);
+      }
+      if (badges.length === 0) {
+        badges.push(`<span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">👌 Matriz operando en rangos estándar con relevo estacional balanceado</span>`);
+      }
+
+      container.innerHTML = badges.join('');
+    }
+
+    function renderDynamicBoxes(m) {
+      const { hydro: h, biomass: b, solar: s, wind: w, geo: g } = state;
+
+      // 1. HIDROELÉCTRICA
+      const badgeHydro = document.getElementById('badgeHydro');
       const boxHydro = document.getElementById('boxHydro');
-      const titleHydro = document.getElementById('titleHydro');
-      const tagHydro = document.getElementById('impactTagHydro');
-      const descHydro = document.getElementById('descHydro');
-
-      if (m.h > 38) {
-        boxHydro.className = "p-3.5 rounded-xl bg-rose-50/80 border border-rose-200 text-xs space-y-1.5 transition-all";
-        titleHydro.textContent = "¡Peligro de Estiaje! Sobrecosto por Hidrocarburos en Época Seca";
-        tagHydro.textContent = `Tarifa +Quema Fósil (+${m.fossilBurnExtraPct}%)`;
-        tagHydro.className = "text-[11px] px-2 py-0.5 rounded bg-rose-200 text-rose-900 font-bold";
-        descHydro.textContent = `Con ${m.h.toFixed(1)}% de dependencia hidráulica, el país tendrá energía barata en invierno (may–oct), pero entre noviembre y abril los caudales y embalses caen drásticamente. Al no haber suficiente relevo eólico o geotérmico, Guatemala debe importar y quemar búnker y carbón, disparando la tarifa general a Q${m.tariffQuetzales.toFixed(2)}/kWh.`;
-      } else if (m.h >= 24) {
-        boxHydro.className = "p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200 text-xs space-y-1.5 transition-all";
-        titleHydro.textContent = "Balance Hidroeléctrico Gestionable Óptimo";
-        tagHydro.textContent = "Embalses Resilientes";
-        tagHydro.className = "text-[11px] px-2 py-0.5 rounded bg-emerald-200 text-emerald-900 font-bold";
-        descHydro.textContent = `Con ${m.h.toFixed(1)}%, aprovechas la topografía y caudales de Guatemala como batería gestionable para cubrir la noche sin quedar expuesto a una crisis tarifaria por combustibles fósiles durante el verano (nov–abr).`;
+      if (h > 38 && m.hasDrySeasonRelief) {
+        badgeHydro.className = 'text-[11px] font-semibold text-emerald-400';
+        badgeHydro.textContent = 'Alta + Relevo Activo';
+        boxHydro.innerHTML = `
+          <p class="font-semibold text-emerald-300">✅ Alta dependencia hidráulica (${h.toFixed(1)}%) VIABLE por sinergia estacional:</p>
+          <p>En Guatemala los embalses bajan entre <b>noviembre y abril (época seca)</b>. Sin embargo, como incluiste <b>${w > 3 ? `Eólica al ${w.toFixed(1)}% (>3%)` : ''} ${w > 3 && b > 13 ? 'y' : ''} ${b > 13 ? `Biomasa al ${b.toFixed(1)}% (>13%)` : ''}</b>, el relevo estacional cubre el déficit sin disparar el uso de hidrocarburos.</p>
+        `;
+      } else if (h > 38 && !m.hasDrySeasonRelief) {
+        badgeHydro.className = 'text-[11px] font-semibold text-rose-400';
+        badgeHydro.textContent = 'Vulnerable en Época Seca';
+        boxHydro.innerHTML = `
+          <p class="font-semibold text-rose-300">⚠️ Riesgo Tarifario en Época Seca (Noviembre – Abril):</p>
+          <p>Depender al <b>${h.toFixed(1)}%</b> del agua sin respaldo estacional provoca que al bajar los caudales en verano el país deba quemar <b>hidrocarburos caros (gasolina/búnker/carbón)</b>. <b>Solución:</b> Sube <b>Eólica &gt; 3%</b> o <b>Biomasa &gt; 13%</b> para hacer viable este porcentaje.</p>
+        `;
+      } else if (h < 20) {
+        badgeHydro.className = 'text-[11px] font-semibold text-amber-300';
+        badgeHydro.textContent = 'Poca Reserva Gestionable';
+        boxHydro.innerHTML = `
+          <p class="font-semibold text-amber-300">Subutilización del recurso hídrico (${h.toFixed(1)}%):</p>
+          <p>La hidroeléctrica con embalse es energía <b>gestionable</b> capaz de despacharse en minutos durante los picos nocturnos. Bajarla tanto obliga a depender de otras fuentes más costosas.</p>
+        `;
       } else {
-        boxHydro.className = "p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 text-xs space-y-1.5 transition-all";
-        titleHydro.textContent = "Subutilización del Recurso Hídrico Gestionable";
-        tagHydro.textContent = "Falta Respaldo Flexible";
-        tagHydro.className = "text-[11px] px-2 py-0.5 rounded bg-amber-200 text-amber-900 font-bold";
-        descHydro.textContent = `Apenas ${m.h.toFixed(1)}% de energía hidráulica desaprovecha los caudales de invierno y obliga a compensar el 70% renovable con tecnologías de altísimo CAPEX (geotermia/eólica) o intermitencia diurna (solar sin baterías).`;
+        badgeHydro.className = 'text-[11px] font-semibold text-sky-300';
+        badgeHydro.textContent = 'Rango Óptimo';
+        boxHydro.innerHTML = `
+          <p class="font-semibold text-sky-300">Columna vertebral gestionable (${h.toFixed(1)}%):</p>
+          <p>Aprovecha la topografía y caudales durante el invierno lluvioso (mayo–octubre) y regula frecuencia en la red nacional sin sobreexponer al sistema en verano.</p>
+        `;
       }
 
-      // 3. Cuadro de Texto Dinámico 2: SOLAR FOTOVOLTAICA
+      // 2. BIOMASA
+      const badgeBiomass = document.getElementById('badgeBiomass');
+      const boxBiomass = document.getElementById('boxBiomass');
+      if (b > 13) {
+        badgeBiomass.className = 'text-[11px] font-semibold text-emerald-400';
+        badgeBiomass.textContent = 'Escudo de Época Seca (>13%)';
+        boxBiomass.innerHTML = `
+          <p class="font-semibold text-lime-300">🌾 Cogeneración Agroindustrial Activa (${b.toFixed(1)}%):</p>
+          <p>Los ingenios azucareros y procesadoras de palma aprovechan sus residuos agrícolas para producir <b>electricidad y vapor de proceso simultáneamente</b>. Al superar el <b>13%</b>, la zafra de verano releva con éxito a las hidroeléctricas y respalda a la solar de noche.</p>
+        `;
+      } else {
+        badgeBiomass.className = 'text-[11px] font-semibold text-slate-400';
+        badgeBiomass.textContent = 'Aporte Moderado';
+        boxBiomass.innerHTML = `
+          <p class="font-semibold text-slate-200">Energía gestionable agroindustrial (${b.toFixed(1)}%):</p>
+          <p>Funciona como respaldo despachable. Si deseas subir la hidroeléctrica por encima del 40% o la solar por encima del 16%, llevar la biomasa a <b>más del 13%</b> estabilizará tu plan anual.</p>
+        `;
+      }
+
+      // 3. SOLAR FOTOVOLTAICA
+      const badgeSolar = document.getElementById('badgeSolar');
       const boxSolar = document.getElementById('boxSolar');
-      const titleSolar = document.getElementById('titleSolar');
-      const tagSolar = document.getElementById('impactTagSolar');
-      const descSolar = document.getElementById('descSolar');
-
-      if (m.s > 17) {
-        boxSolar.className = "p-3.5 rounded-xl bg-rose-50/80 border border-rose-200 text-xs space-y-1.5 transition-all";
-        titleSolar.textContent = "¡Inestabilidad Crítica! 90% On-Grid Sin Baterías y Disparo Anti-Isla";
-        tagSolar.textContent = "Riesgo de Apagón 6:00 PM";
-        tagSolar.className = "text-[11px] px-2 py-0.5 rounded bg-rose-200 text-rose-900 font-bold";
-        descSolar.textContent = `Aunque ahorra en la factura diurna bajo la NTGDR, llevar la Solar a ${m.s.toFixed(1)}% desestabiliza la cobertura nacional: el 90% de instalaciones no usa baterías (usa la red como batería virtual). Al ocultarse el sol o pasar nubes, la generación cae a cero y la protección Anti-isla apaga los inversores en milisegundos, provocando apagones.`;
-      } else if (m.s >= 8) {
-        boxSolar.className = "p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200 text-xs space-y-1.5 transition-all";
-        titleSolar.textContent = "Generación Distribuida Óptima (Medición Neta y ROI 3–5 Años)";
-        tagSolar.textContent = "Ahorro ~Q360/mes • Pitch 2.15m";
-        tagSolar.className = "text-[11px] px-2 py-0.5 rounded bg-emerald-200 text-emerald-900 font-bold";
-        descSolar.textContent = `Con ${m.s.toFixed(1)}%, las viviendas (ej. 300 kWh/mes ahorrando Q360/mes con contador bidireccional) e industrias (como Finca La Sabana de 2.2 MW con pitch de 2.15 m entre filas y protección Anti-isla) recuperan su inversión en 3 a 5 años sin saturar la red pública.`;
+      if (s > 16 && m.hasSolarBackup) {
+        badgeSolar.className = 'text-[11px] font-semibold text-emerald-400';
+        badgeSolar.textContent = 'Alta + Respaldo Firme';
+        boxSolar.innerHTML = `
+          <p class="font-semibold text-emerald-300">☀️ Masificación Solar On-Grid Respaldada (${s.toFixed(1)}%):</p>
+          <p>El <b>90% opera On-Grid sin baterías</b> bajo la NTGDR (la red pública es la batería virtual con contador bidireccional, pitch de <b>2.15 m</b> como en Finca La Sabana 2.2 MW y <b>protección Anti-isla</b>). Tu inversión en Geotérmica/Biomasa/Hidro cubre perfectamente la caída de las 6:00 PM.</p>
+        `;
+      } else if (s > 16 && !m.hasSolarBackup) {
+        badgeSolar.className = 'text-[11px] font-semibold text-rose-400';
+        badgeSolar.textContent = 'Inestable de Noche';
+        boxSolar.innerHTML = `
+          <p class="font-semibold text-rose-300">⚠️ Cobertura Inestable por Sistema On-Grid Sin Baterías (${s.toFixed(1)}%):</p>
+          <p>Aunque logra un <b>ROI de 3 a 5 años</b> (ahorro de Q360/mes en consumos de 300 kWh a Q1.50), el 90% no usa baterías y el inversor se apaga en milisegundos por <b>protección Anti-isla</b>. <b>Solución:</b> Sube <b>Geotérmica ≥ 4%</b> o <b>Biomasa ≥ 13%</b> para sostener la noche.</p>
+        `;
       } else {
-        boxSolar.className = "p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 text-xs space-y-1.5 transition-all";
-        titleSolar.textContent = "Desaprovechamiento del Ahorro Solar Residencial e Industrial";
-        tagSolar.textContent = "Falta Generación Diurna";
-        tagSolar.className = "text-[11px] px-2 py-0.5 rounded bg-amber-200 text-amber-900 font-bold";
-        descSolar.textContent = `Con solo ${m.s.toFixed(1)}%, desaprovechas la única renovable masificable en áreas urbanas sin riesgo geológico ni grandes obras civiles estatales, perdiendo más de 15 años de energía diurna casi gratuita tras el ROI de 3–5 años.`;
+        badgeSolar.className = 'text-[11px] font-semibold text-yellow-300';
+        badgeSolar.textContent = 'ROI 3–5 años (NTGDR)';
+        boxSolar.innerHTML = `
+          <p class="font-semibold text-yellow-300">Ahorro directo en hogares e industria (${s.toFixed(1)}%):</p>
+          <p>Única renovable masificable a nivel usuario bajo Medición Neta (90% On-Grid sin baterías). Excelente para abatir picos diurnos con rápido retorno de inversión y bajo riesgo técnico.</p>
+        `;
       }
 
-      // 4. Cuadro de Texto Dinámico 3: EÓLICA
+      // 4. EÓLICA
+      const badgeWind = document.getElementById('badgeWind');
       const boxWind = document.getElementById('boxWind');
-      const titleWind = document.getElementById('titleWind');
-      const tagWind = document.getElementById('impactTagWind');
-      const descWind = document.getElementById('descWind');
-
-      if (m.w > 15) {
-        boxWind.className = "p-3.5 rounded-xl bg-rose-50/80 border border-rose-200 text-xs space-y-1.5 transition-all";
-        titleWind.textContent = "¡Sobrecosto Logístico y de Obra Civil en Montaña!";
-        tagWind.textContent = "Dispara Presupuesto CAPEX";
-        tagWind.className = "text-[11px] px-2 py-0.5 rounded bg-rose-200 text-rose-900 font-bold";
-        descWind.textContent = `Escalar la eólica a ${m.w.toFixed(1)}% dispara el presupuesto: exige 1 a 2 años de medición anemométrica (>7 m/s), obra civil multimillonaria para transportar palas indivisibles de >60 m y grúas de alto tonelaje por carreteras estrechas de montaña, más licencias por rutas migratorias de aves. Además, como la potencia depende del cubo del viento (v³), una brisa menor desploma la red.`;
-      } else if (m.w >= 7.5) {
-        boxWind.className = "p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200 text-xs space-y-1.5 transition-all";
-        titleWind.textContent = "Relevo Estacional Estratégico en Época Seca (Noviembre – Abril)";
-        tagWind.textContent = "Efecto Venturi >7 m/s";
-        tagWind.className = "text-[11px] px-2 py-0.5 rounded bg-emerald-200 text-emerald-900 font-bold";
-        descWind.textContent = `Con ${m.w.toFixed(1)}% inyectado al Sistema Nacional (ampliando corredores con efecto Venturi como Villa Canales, San Vicente Pacaya y Jutiapa), los vientos alisios de noviembre a abril hacen el relevo perfecto cuando bajan los embalses hidroeléctricos.`;
+      if (w > 12) {
+        badgeWind.className = 'text-[11px] font-semibold text-amber-300';
+        badgeWind.textContent = 'Alto Costo Logístico';
+        boxWind.innerHTML = `
+          <p class="font-semibold text-amber-300">💨 Sobrecosto de Obra Civil y Logística (${w.toFixed(1)}%):</p>
+          <p>Exige <b>1 a 2 años de medición anemométrica (&gt;7 m/s, efecto Venturi, potencia $\\propto v^3$)</b>, carreteras de montaña multimillonarias para transportar <b>palas indivisibles de &gt;60 m</b> y licencias ambientales por aves migratorias.${m.hasCapexBuffer ? ' <b class="text-emerald-300">Compensado parcialmente por tu participación solar/biomasa.</b>' : ''}</p>
+        `;
+      } else if (w > 3.0) {
+        badgeWind.className = 'text-[11px] font-semibold text-emerald-400';
+        badgeWind.textContent = 'Relevo Alisios Activo (>3%)';
+        boxWind.innerHTML = `
+          <p class="font-semibold text-teal-300">🌬️ Relevo Estratégico de Época Seca (${w.toFixed(1)}%):</p>
+          <p>En Villa Canales, San Vicente Pacaya y Jutiapa (~107 MW actuales), los <b>vientos alisios (noviembre–abril, &gt;7 m/s)</b> alcanzan su máximo justo cuando bajan las hidroeléctricas, blindando tu plan contra sequías.</p>
+        `;
       } else {
-        boxWind.className = "p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 text-xs space-y-1.5 transition-all";
-        titleWind.textContent = "Relevo Eólico Insuficiente para la Época Seca";
-        tagWind.textContent = `Cerca del ~2.2% actual (107 MW)`;
-        tagWind.className = "text-[11px] px-2 py-0.5 rounded bg-amber-200 text-amber-900 font-bold";
-        descWind.textContent = `Mantener la eólica en ${m.w.toFixed(1)}% desaprovecha el pico de los vientos alisios entre noviembre y abril, dejando a las hidroeléctricas sin su mejor aliado estacional durante los meses de sequía.`;
+        badgeWind.className = 'text-[11px] font-semibold text-slate-400';
+        badgeWind.textContent = 'Bajo Relevo Estacional';
+        boxWind.innerHTML = `
+          <p class="font-semibold text-slate-200">Inyección exclusiva al Sistema Nacional (${w.toFixed(1)}%):</p>
+          <p>Actualmente aporta ~2.2% en el país. Si la subes por encima del <b>3.0%</b>, desbloqueas el relevo de vientos alisios para respaldar una alta dependencia hidroeléctrica en verano.</p>
+        `;
       }
 
-      // 5. Cuadro de Texto Dinámico 4: GEOTÉRMICA
+      // 5. GEOTÉRMICA
+      const badgeGeo = document.getElementById('badgeGeo');
       const boxGeo = document.getElementById('boxGeo');
-      const titleGeo = document.getElementById('titleGeo');
-      const tagGeo = document.getElementById('impactTagGeo');
-      const descGeo = document.getElementById('descGeo');
-
-      if (m.g > 14) {
-        boxGeo.className = "p-3.5 rounded-xl bg-rose-50/80 border border-rose-200 text-xs space-y-1.5 transition-all";
-        titleGeo.textContent = "¡Disparo Presupuestario por Riesgo Geológico a Fondo Perdido!";
-        tagGeo.textContent = "Pozos $4M–$8M (50% Riesgo Seco)";
-        tagGeo.className = "text-[11px] px-2 py-0.5 rounded bg-rose-200 text-rose-900 font-bold";
-        descGeo.textContent = `Aunque da estabilidad 24/7, forzar la geotérmica a ${m.g.toFixed(1)}% quiebra el presupuesto: cada pozo exploratorio de 2,000 m cuesta entre $4 y $8 millones de dólares a fondo perdido con 50% de probabilidad de salir seco o bajo 150°C (riesgo 100% privado), más pozos obligatorios de reinyección.`;
-      } else if (m.g >= 7) {
-        boxGeo.className = "p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200 text-xs space-y-1.5 transition-all";
-        titleGeo.textContent = "Base Pura 24/7/365 con Plantas de Ciclo Binario (>85% Factor Planta)";
-        tagGeo.textContent = "Base Firme Óptima";
-        tagGeo.className = "text-[11px] px-2 py-0.5 rounded bg-emerald-200 text-emerald-900 font-bold";
-        descGeo.textContent = `Con ${m.g.toFixed(1)}% (aprovechando de forma gradual el potencial de 1,000 MW más allá de los ~49 MW actuales en Zunil y Amatitlán), el sistema cuenta con energía base 24/7 mediante ciclo binario (>150°C en circuito cerrado), respaldando la intermitencia del sol y el viento.`;
+      if (g > 11) {
+        badgeGeo.className = 'text-[11px] font-semibold text-rose-400';
+        badgeGeo.textContent = 'Alto Riesgo Geológico ($4M-$8M)';
+        boxGeo.innerHTML = `
+          <p class="font-semibold text-rose-300">🌋 Barrera Financiera por Riesgo de Perforación (${g.toFixed(1)}%):</p>
+          <p>Aunque Guatemala tiene 1,000 MW de potencial, perforar un pozo exploratorio de <b>2,000 metros cuesta entre $4M y $8M USD a fondo perdido</b> con <b>50% de probabilidad de salir seco</b> (asumido 100% por capital privado), más pozos obligatorios de reinyección.${m.hasCapexBuffer ? ' <b class="text-emerald-300">Tu mezcla con Solar/Biomasa ayuda a amortiguar el presupuesto global.</b>' : ''}</p>
+        `;
+      } else if (g >= 3.5) {
+        badgeGeo.className = 'text-[11px] font-semibold text-emerald-400';
+        badgeGeo.textContent = 'Base Pura 24/7 (Factor >85%)';
+        boxGeo.innerHTML = `
+          <p class="font-semibold text-rose-300">🌋 Ancla de Estabilidad 24/7/365 (${g.toFixed(1)}%):</p>
+          <p>Opera con plantas de <b>ciclo binario</b> (como en Zunil y Amatitlán) donde el fluido hidrotermal (<b>&gt;150°C</b>, cámara magmática + roca permeable + agua a presión) calienta un líquido secundario sin tocar la turbina. Con <b>factor de planta &gt;85%</b>, sostiene la red de día y de noche sin depender del clima.</p>
+        `;
       } else {
-        boxGeo.className = "p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 text-xs space-y-1.5 transition-all";
-        titleGeo.textContent = "Baja Energía Base Firme (Vulnerabilidad Nocturna y Climática)";
-        tagGeo.textContent = `Cerca del ~1.7% actual (49 MW)`;
-        tagGeo.className = "text-[11px] px-2 py-0.5 rounded bg-amber-200 text-amber-900 font-bold";
-        descGeo.textContent = `Con apenas ${m.g.toFixed(1)}% de geotérmica, desperdicias el arco volcánico de Guatemala y dejas al Sistema Nacional sin suficiente base firme 24/7 (factor de planta >85%) cuando no hay sol ni sopla el viento.`;
-      }
-
-      // 6. Actualizar los 3 Medidores de la Derecha
-      const barBudget = document.getElementById('barBudget');
-      const metricBudgetLabel = document.getElementById('metricBudgetLabel');
-      barBudget.style.width = `${m.budgetScore}%`;
-      if (m.budgetScore > 68) {
-        metricBudgetLabel.textContent = `Crítico ($${m.estimatedMillions}M CAPEX)`;
-        metricBudgetLabel.className = "text-xs font-extrabold px-2 py-0.5 rounded bg-rose-100 text-rose-800";
-        barBudget.className = "bg-rose-500 h-2.5 rounded-full transition-all duration-300";
-      } else if (m.budgetScore > 48) {
-        metricBudgetLabel.textContent = `Elevado ($${m.estimatedMillions}M CAPEX)`;
-        metricBudgetLabel.className = "text-xs font-extrabold px-2 py-0.5 rounded bg-amber-100 text-amber-800";
-        barBudget.className = "bg-amber-500 h-2.5 rounded-full transition-all duration-300";
-      } else {
-        metricBudgetLabel.textContent = `Viable ($${m.estimatedMillions}M CAPEX)`;
-        metricBudgetLabel.className = "text-xs font-extrabold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800";
-        barBudget.className = "bg-emerald-500 h-2.5 rounded-full transition-all duration-300";
-      }
-
-      const barTariff = document.getElementById('barTariff');
-      const metricTariffLabel = document.getElementById('metricTariffLabel');
-      barTariff.style.width = `${m.tariffScore}%`;
-      if (m.tariffQuetzales > 1.72) {
-        metricTariffLabel.textContent = `Disparada (Q${m.tariffQuetzales.toFixed(2)} / kWh)`;
-        metricTariffLabel.className = "text-xs font-extrabold px-2 py-0.5 rounded bg-rose-100 text-rose-800";
-        barTariff.className = "bg-rose-500 h-2.5 rounded-full transition-all duration-300";
-      } else if (m.tariffQuetzales > 1.50) {
-        metricTariffLabel.textContent = `Moderada (Q${m.tariffQuetzales.toFixed(2)} / kWh)`;
-        metricTariffLabel.className = "text-xs font-extrabold px-2 py-0.5 rounded bg-amber-100 text-amber-800";
-        barTariff.className = "bg-amber-500 h-2.5 rounded-full transition-all duration-300";
-      } else {
-        metricTariffLabel.textContent = `Competitiva (Q${m.tariffQuetzales.toFixed(2)} / kWh)`;
-        metricTariffLabel.className = "text-xs font-extrabold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800";
-        barTariff.className = "bg-emerald-500 h-2.5 rounded-full transition-all duration-300";
-      }
-
-      const barStability = document.getElementById('barStability');
-      const metricStabilityLabel = document.getElementById('metricStabilityLabel');
-      barStability.style.width = `${m.stabilityScore}%`;
-      if (m.stabilityScore < 62) {
-        metricStabilityLabel.textContent = `Inestable (${m.stabilityScore}% Cobertura)`;
-        metricStabilityLabel.className = "text-xs font-extrabold px-2 py-0.5 rounded bg-rose-100 text-rose-800";
-        barStability.className = "bg-rose-500 h-2.5 rounded-full transition-all duration-300";
-      } else if (m.stabilityScore < 78) {
-        metricStabilityLabel.textContent = `Riesgo Medio (${m.stabilityScore}%)`;
-        metricStabilityLabel.className = "text-xs font-extrabold px-2 py-0.5 rounded bg-amber-100 text-amber-800";
-        barStability.className = "bg-amber-500 h-2.5 rounded-full transition-all duration-300";
-      } else {
-        metricStabilityLabel.textContent = `Sólida (${m.stabilityScore}% Cobertura)`;
-        metricStabilityLabel.className = "text-xs font-extrabold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800";
-        barStability.className = "bg-emerald-500 h-2.5 rounded-full transition-all duration-300";
-      }
-
-      // Barras estacionales
-      document.getElementById('seasonWetVal').textContent = `${m.wetCoverage}% Cubierto`;
-      document.getElementById('barSeasonWet').style.width = `${m.wetCoverage}%`;
-
-      document.getElementById('seasonDryVal').textContent = `${m.dryCoverage}% Cubierto`;
-      document.getElementById('barSeasonDry').style.width = `${m.dryCoverage}%`;
-      document.getElementById('barSeasonDry').className = `${m.dryCoverage < 65 ? 'bg-rose-500' : 'bg-cyan-600'} h-2 rounded-full transition-all duration-300`;
-
-      document.getElementById('seasonNightVal').textContent = `${m.nightCoverage}% Cubierto`;
-      document.getElementById('barSeasonNight').style.width = `${m.nightCoverage}%`;
-      document.getElementById('barSeasonNight').className = `${m.nightCoverage < 65 ? 'bg-rose-500' : 'bg-indigo-600'} h-2 rounded-full transition-all duration-300`;
-
-      // 7. Tarjeta de Alerta Rápida en Vivo
-      const liveAlertCard = document.getElementById('liveAlertCard');
-      const liveAlertTitle = document.getElementById('liveAlertTitle');
-      const liveAlertText = document.getElementById('liveAlertText');
-
-      if (diffFrom70 > 0.5) {
-        liveAlertCard.className = "p-4 rounded-2xl border bg-rose-50 border-rose-200 text-rose-900 text-xs flex gap-3 items-start shadow-sm transition-all";
-        liveAlertTitle.textContent = `Suma Renovable fuera del 70% (${m.totalRen.toFixed(1)}%)`;
-        liveAlertText.textContent = "Para evaluar justamente la matriz guatemalteca, la suma de las 4 renovables debe ser 70.0%. Activa el auto-relevo o pulsa 'Ajustar exactamente al 70%'.";
-      } else if (m.h > 38 && (m.w + m.g) < 16) {
-        liveAlertCard.className = "p-4 rounded-2xl border bg-rose-50 border-rose-200 text-rose-900 text-xs flex gap-3 items-start shadow-sm transition-all";
-        liveAlertTitle.textContent = "Alerta: Crisis Tarifaria en Época Seca (Quema de Hidrocarburos)";
-        liveAlertText.textContent = "Tu alta dependencia hidráulica colapsará entre noviembre y abril. Sin suficiente eólica (alisios) ni geotérmica base, quemarás búnker encareciendo toda la electricidad.";
-      } else if (m.s > 17) {
-        liveAlertCard.className = "p-4 rounded-2xl border bg-rose-50 border-rose-200 text-rose-900 text-xs flex gap-3 items-start shadow-sm transition-all";
-        liveAlertTitle.textContent = "Alerta: Inestabilidad de Cobertura por Solar On-Grid sin Baterías";
-        liveAlertText.textContent = "El 90% de la energía solar en Guatemala no tiene baterías. Al caer la tarde o ante fallas con desconexión Anti-isla, tu red sufrirá apagones severos.";
-      } else if (m.budgetScore > 68) {
-        liveAlertCard.className = "p-4 rounded-2xl border bg-amber-50 border-amber-200 text-amber-900 text-xs flex gap-3 items-start shadow-sm transition-all";
-        liveAlertTitle.textContent = "Alerta: Presupuesto de Inversión (CAPEX) Desbordado";
-        liveAlertText.textContent = "Demasiada Geotérmica o Eólica exige cientos de millones en pozos exploratorios de $4M–$8M a fondo perdido y carreteras de montaña para palas de >60 metros.";
-      } else {
-        liveAlertCard.className = "p-4 rounded-2xl border bg-emerald-50 border-emerald-200 text-emerald-900 text-xs flex gap-3 items-start shadow-sm transition-all";
-        liveAlertTitle.textContent = "Portafolio Híbrido Bien Balanceado";
-        liveAlertText.textContent = "Excelente sinergia entre tecnologías. Haz clic en 'Enviar y Evaluar Plan Energético Anual' para correr la auditoría de los 4 trimestres.";
+        badgeGeo.className = 'text-[11px] font-semibold text-slate-400';
+        badgeGeo.textContent = 'Base Firme Reducida';
+        boxGeo.innerHTML = `
+          <p class="font-semibold text-slate-200">Energía de base pura (${g.toFixed(1)}%):</p>
+          <p>Hoy representa ~1.7% (~49 MW) en Guatemala. Subirla a <b>4%–8%</b> te da un colchón firme las 24 horas para compensar la intermitencia del sol y el viento sin disparar en exceso el riesgo exploratorio.</p>
+        `;
       }
     }
 
-    // Algoritmo de Evaluación Profunda al hacer clic en "Enviar y Evaluar Plan Energético Anual"
-    function evaluateAnnualPlan() {
+    function evaluatePlan() {
       const m = calculateMetrics();
-      const diffFrom70 = Math.abs(m.totalRen - TARGET_TOTAL);
+      const { hydro: h, biomass: b, solar: s, wind: w, geo: g } = state;
 
-      // Puntaje compuesto de 0 a 100
-      let rawScore = 100;
-      rawScore -= Math.max(0, m.budgetScore - 48) * 0.85;
-      rawScore -= Math.max(0, (m.tariffQuetzales - 1.44) * 55);
-      rawScore -= Math.max(0, (86 - m.stabilityScore) * 1.15);
-      rawScore -= diffFrom70 * 3.5;
-      const finalScore = Math.max(10, Math.min(98, Math.round(rawScore)));
-
-      // Actualizar métricas superiores del dictamen
-      document.getElementById('verdictScore').textContent = `${finalScore}/100`;
-      document.getElementById('resFossilSpike').textContent = `+${m.fossilBurnExtraPct.toFixed(1)}%`;
-      document.getElementById('resFossilSpike').className = `text-2xl font-black mt-1 ${m.fossilBurnExtraPct > 8 ? 'text-rose-600' : 'text-emerald-600'}`;
-
-      document.getElementById('resCapexDollars').textContent = `$${m.estimatedMillions} M`;
-      document.getElementById('resCapexDollars').className = `text-2xl font-black mt-1 ${m.budgetScore > 65 ? 'text-rose-600' : 'text-indigo-600'}`;
-
-      const blackoutRiskPct = Math.max(3, Math.min(95, 100 - m.stabilityScore));
-      document.getElementById('resBlackoutProb').textContent = `${blackoutRiskPct > 35 ? 'Crítico' : blackoutRiskPct > 18 ? 'Moderado' : 'Bajo'} (${blackoutRiskPct}%)`;
-      document.getElementById('resBlackoutProb').className = `text-2xl font-black mt-1 ${blackoutRiskPct > 35 ? 'text-rose-600' : blackoutRiskPct > 18 ? 'text-amber-600' : 'text-emerald-600'}`;
-
-      document.getElementById('resFinalTariff').textContent = `Q${m.tariffQuetzales.toFixed(2)} / kWh`;
-      document.getElementById('resFinalTariff').className = `text-2xl font-black mt-1 ${m.tariffQuetzales > 1.68 ? 'text-rose-600' : 'text-emerald-600'}`;
-
-      // Construcción de Diagnóstico de Flancos
-      const flanks = [];
-
-      if (diffFrom70 > 0.5) {
-        flanks.push({
-          type: 'danger',
-          icon: 'scale',
-          title: `Flanco de Meta Nacional: Suma Renovable en ${m.totalRen.toFixed(1)}%`,
-          desc: `La dinámica exige cubrir el 70.0% de la matriz con las 4 fuentes renovables. Tu configuración dejó un desfase de ${(m.totalRen - 70).toFixed(1)}%, distorsionando el 30% fijo de biomasa e hidrocarburos.`
-        });
-      }
-
-      if (m.h > 38) {
-        flanks.push({
-          type: 'danger',
-          icon: 'flame-kindling',
-          title: `Flanqueado en Época Seca por Exceso Hidráulico (${m.h.toFixed(1)}%)`,
-          desc: `Al depender en ${m.h.toFixed(1)}% de hidroeléctricas, entre noviembre y abril los embalses caen y obligan a quemar +${m.fossilBurnExtraPct.toFixed(1)}% adicional de búnker y carbón importado, subiendo la tarifa general a Q${m.tariffQuetzales.toFixed(2)}/kWh.`
-        });
-      } else if (m.h < 22) {
-        flanks.push({
-          type: 'warning',
-          icon: 'droplet-off',
-          title: `Flanco por Baja Energía Gestionable Hídrica (${m.h.toFixed(1)}%)`,
-          desc: `Reducir la hidroeléctrica a ${m.h.toFixed(1)}% desaprovecha los embalses que permiten despachar energía a voluntad en horas pico nocturnas.`
-        });
-      }
-
-      if (m.s > 17) {
-        flanks.push({
-          type: 'danger',
-          icon: 'zap-off',
-          title: `Flanqueado por Inestabilidad Solar On-Grid (${m.s.toFixed(1)}%)`,
-          desc: `El 90% de la solar bajo la NTGDR opera sin baterías (red como batería virtual) y exige desconexión Anti-isla en milisegundos. Con ${m.s.toFixed(1)}%, al caer el sol a las 18:00h o ante nubes densas, el sistema pierde potencia de golpe generando apagones.`
-        });
-      } else if (m.s < 7.5) {
-        flanks.push({
-          type: 'warning',
-          icon: 'sun-dim',
-          title: `Flanco Financiero: Poca Generación Distribuida Solar (${m.s.toFixed(1)}%)`,
-          desc: `Pierdes el alivio diurno de techos residenciales e industriales (ROI de 3–5 años y ahorros tipo Q360/mes) que no le cuestan presupuesto de exploración al Estado.`
-        });
-      }
-
-      if (m.w > 15) {
-        flanks.push({
-          type: 'danger',
-          icon: 'truck',
-          title: `Flanqueado en Presupuesto por Cuello de Botella Eólico (${m.w.toFixed(1)}%)`,
-          desc: `Pasar de ~2.2% actual a ${m.w.toFixed(1)}% exige 1–2 años de medición anemométrica (>7 m/s), obra civil multimillonaria para subir palas indivisibles de >60 m por carreteras de montaña y permisos de rutas migratorias de aves.`
-        });
-      } else if (m.w < 7) {
-        flanks.push({
-          type: 'warning',
-          icon: 'wind',
-          title: `Flanco Estacional: Sin Relevo de Vientos Alisios (${m.w.toFixed(1)}%)`,
-          desc: `Con solo ${m.w.toFixed(1)}% eólico, desaprovechas los corredores con efecto Venturi entre noviembre y abril, dejando sin respaldo la caída de los embalses hidroeléctricos.`
-        });
-      }
-
-      if (m.g > 14) {
-        flanks.push({
-          type: 'danger',
-          icon: 'Coins',
-          title: `Flanqueado por Riesgo Geológico Geotérmico (${m.g.toFixed(1)}%)`,
-          desc: `Escalar a ${m.g.toFixed(1)}% dispara el CAPEX a $${m.estimatedMillions}M: perforar pozos de 2,000 m cuesta $4M–$8M a fondo perdido con 50% de probabilidad de salir secos (asumido 100% por capital privado), más pozos de reinyección.`
-        });
-      } else if (m.g < 6.5) {
-        flanks.push({
-          type: 'warning',
-          icon: 'shield-alert',
-          title: `Flanco de Base Pura 24/7: Poca Geotermia (${m.g.toFixed(1)}%)`,
-          desc: `La geotérmica de ciclo binario (>150°C) es la única con factor de planta >85% las 24 horas los 365 días. Con ${m.g.toFixed(1)}%, tu matriz carece de piso firme continuo.`
-        });
-      }
-
-      if (flanks.length === 0) {
-        flanks.push({
-          type: 'success',
-          icon: 'check-circle-2',
-          title: 'Sin Flancos Críticos: Portafolio Híbrido Equilibrado',
-          desc: 'Lograste el balance de ingeniería descrito en la Diapositiva 35: la base firme geotérmica (24/7) y la hidráulica gestionable sostienen la red, los vientos alisios hacen el relevo en época seca y la solar On-Grid ahorra de día sin causar apagones.'
-        });
-        flanks.push({
-          type: 'success',
-          icon: 'award',
-          title: 'Sinergia con el 30% de Biomasa y Respaldo',
-          desc: 'Tu configuración del 70% se acopla perfectamente con la cogeneración de biomasa de los ingenios azucareros en temporada de zafra (nov–abr), evitando quemar búnker importado.'
-        });
-      }
-
-      // Renderizar Flancos
-      const flanksContainer = document.getElementById('flanksContainer');
-      flanksContainer.innerHTML = flanks.map(f => {
-        const styles = f.type === 'danger'
-          ? 'bg-rose-50 border-rose-200 text-rose-950'
-          : f.type === 'warning'
-            ? 'bg-amber-50 border-amber-200 text-amber-950'
-            : 'bg-emerald-50 border-emerald-200 text-emerald-950';
-        const iconColor = f.type === 'danger' ? 'text-rose-600' : f.type === 'warning' ? 'text-amber-600' : 'text-emerald-600';
-        return `
-          <div class="p-4 rounded-2xl border ${styles} flex gap-3.5 items-start">
-            <i data-lucide="${f.icon}" class="w-5 h-5 flex-shrink-0 mt-0.5 ${iconColor}"></i>
-            <div class="space-y-1">
-              <h4 class="text-sm font-bold">${f.title}</h4>
-              <p class="text-xs leading-relaxed opacity-90">${f.desc}</p>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      // Encabezado del Veredicto según el resultado
-      const verdictTitle = document.getElementById('verdictTitle');
-      const verdictSubtitle = document.getElementById('verdictSubtitle');
-      const verdictBadge = document.getElementById('verdictBadge');
-      const verdictScoreEl = document.getElementById('verdictScore');
-
-      if (finalScore >= 82 && !flanks.some(f => f.type === 'danger')) {
-        verdictTitle.textContent = "¡Plan Anual Equilibrado! Portafolio Híbrido Resiliente";
-        verdictSubtitle.textContent = "Tu matriz energética supera con éxito la época lluviosa, el estiaje de época seca y la transición nocturna sin quebrar el presupuesto ni disparar la tarifa.";
-        verdictBadge.textContent = "Aprobado con Excelencia";
-        verdictBadge.className = "inline-block text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300";
-        verdictScoreEl.className = "text-4xl font-black text-emerald-400 my-1";
-      } else if (m.h > 38) {
-        verdictTitle.textContent = "Plan Flanqueado en Época Seca por Dependencia Hidráulica";
-        verdictSubtitle.textContent = "Tu matriz funciona bien de mayo a octubre, pero entre noviembre y abril los embalses bajan y disparan el costo de la electricidad por quema de hidrocarburos.";
-        verdictBadge.textContent = "Crisis Tarifaria en Verano";
-        verdictBadge.className = "inline-block text-xs font-bold px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300";
-        verdictScoreEl.className = "text-4xl font-black text-rose-400 my-1";
-      } else if (m.s > 17) {
-        verdictTitle.textContent = "Plan Flanqueado por Inestabilidad de Cobertura Solar On-Grid";
-        verdictSubtitle.textContent = "Exceso de generación fotovoltaica conectada a red sin baterías (90% On-Grid). Al caer la noche o activarse la protección Anti-isla, el sistema sufre apagones.";
-        verdictBadge.textContent = "Red Inestable / Apagones";
-        verdictBadge.className = "inline-block text-xs font-bold px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300";
-        verdictScoreEl.className = "text-4xl font-black text-rose-400 my-1";
-      } else if (m.budgetScore > 66) {
-        verdictTitle.textContent = "Plan Flanqueado por Quiebra de Presupuesto e Inversión (CAPEX)";
-        verdictSubtitle.textContent = "Aunque técnicamente estable, el costo de perforar pozos geotérmicos a fondo perdido ($4M–$8M) y construir obra civil para palas eólicas >60 m hace inviable el presupuesto.";
-        verdictBadge.textContent = "Inviable por Presupuesto";
-        verdictBadge.className = "inline-block text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300";
-        verdictScoreEl.className = "text-4xl font-black text-amber-400 my-1";
-      } else {
-        verdictTitle.textContent = "Plan con Desbalances Moderados de Relevo Estacional";
-        verdictSubtitle.textContent = "Tu matriz sobrevive el año pero presenta vulnerabilidades puntuales en costo o respaldo nocturno que pueden optimizarse.";
-        verdictBadge.textContent = "Requiere Ajustes";
-        verdictBadge.className = "inline-block text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300";
-        verdictScoreEl.className = "text-4xl font-black text-amber-400 my-1";
-      }
-
-      // Simulación de los 4 Trimestres del Año en Guatemala
-      const q1Ok = m.dryCoverage >= 68;
-      const q2Ok = (m.g >= 6.5 && m.s <= 17);
-      const q3Ok = (m.h >= 24 && m.s <= 18);
-      const q4Ok = (m.w >= 7 && m.stabilityScore >= 72);
-
+      // Evaluación por Trimestres
       const quarters = [
         {
-          period: "Trimestre 1 (Ene – Mar)",
-          season: "Estiaje Severo y Vientos Alisios",
-          status: q1Ok ? "Superado" : "Flanquea",
-          ok: q1Ok,
-          detail: q1Ok
-            ? `Los corredores Venturi (>7 m/s) con ${m.w.toFixed(1)}% eólico y ${m.g.toFixed(1)}% geotérmico (más la biomasa de ingenios) cubren la baja de embalses sin quemar búnker.`
-            : `Embalses en nivel mínimo. Con ${m.h.toFixed(1)}% hidro y poco relevo eólico/geotérmico, se dispara la quema de hidrocarburos (+${m.fossilBurnExtraPct.toFixed(1)}%).`
+          name: 'Trimestre 1 (Ene – Mar)',
+          season: 'Época Seca • Vientos Alisios y Zafra',
+          ok: !(h > 38 && !m.hasDrySeasonRelief) && m.totalRen >= 64,
+          detail: (h > 38 && m.hasDrySeasonRelief)
+            ? `Embalses bajos, pero tu relevo de ${w > 3 ? `Eólica (${w.toFixed(1)}%)` : ''} ${w > 3 && b > 13 ? '+' : ''} ${b > 13 ? `Biomasa (${b.toFixed(1)}%)` : ''} mantiene la tarifa estable sin quemar búnker.`
+            : (h > 38 && !m.hasDrySeasonRelief)
+              ? `¡Falla estacional! La hidroeléctrica al ${h.toFixed(1)}% cae por sequía y, al no tener Eólica >3% ni Biomasa >13%, se dispara el uso de hidrocarburos.`
+              : `Suministro estable apoyado por radiación solar limpia, alisios y cogeneración en ingenios.`
         },
         {
-          period: "Trimestre 2 (Abr – Jun)",
-          season: "Transición Cálida e Inicio Lluvias",
-          status: q2Ok ? "Superado" : "Flanquea",
-          ok: q2Ok,
-          detail: q2Ok
-            ? `Cuando amainan los alisios en abril/mayo antes de llenarse las represas, la base geotérmica 24/7 (${m.g.toFixed(1)}%) y la solar diurna sostienen el pico de calor.`
-            : `Mes crítico de transición: caen los vientos alisios mientras los embalses aún no se recuperan, exponiendo la falta de base geotérmica o el exceso solar sin baterías.`
+          name: 'Trimestre 2 (Abr – Jun)',
+          season: 'Transición de Calor a Primeras Lluvias',
+          ok: m.stability >= 70 && m.tariffStress <= 68,
+          detail: m.stability >= 70
+            ? `Los picos de aire acondicionado e industria diurna se cubren con Solar (${s.toFixed(1)}%), mientras la base firme sostiene la noche.`
+            : `Inestabilidad a las 6:00 PM: el fin de la zafra coincide con alta demanda vespertina y falta de respaldo firme nocturno.`
         },
         {
-          period: "Trimestre 3 (Jul – Sep)",
-          season: "Invierno Copioso y Canícula",
-          status: q3Ok ? "Superado" : "Flanquea",
-          ok: q3Ok,
-          detail: q3Ok
-            ? `Las hidroeléctricas (${m.h.toFixed(1)}%) operan a plena capacidad y los proyectos solares con pitch calculado de 2.15 m evitan sombras, manteniendo tarifa baja.`
-            : m.s > 17
-              ? `Las tormentas vespertinas nublan de golpe el ${m.s.toFixed(1)}% solar On-Grid y disparan desconexiones Anti-isla en milisegundos.`
-              : `Con solo ${m.h.toFixed(1)}% hidráulico no se aprovecha el caudal abundante de la época lluviosa para abaratar la tarifa.`
+          name: 'Trimestre 3 (Jul – Sep)',
+          season: 'Invierno Lluvioso y Nubosidad (Canícula)',
+          ok: !(s > 20 && !m.hasSolarBackup) && h >= 18,
+          detail: (s > 16 && m.hasSolarBackup)
+            ? `Aunque las lluvias y nubes reducen la captación solar y activan protecciones Anti-isla, tus embalses hidroeléctricos (${h.toFixed(1)}%) y geotermia (${g.toFixed(1)}%) toman el relevo.`
+            : (s > 20 && !m.hasSolarBackup)
+              ? `Nubosidad de invierno desploma la generación solar On-Grid sin baterías, causando huecos de cobertura por falta de hidro/geotermia.`
+              : `Máximo aprovechamiento de caudales hidroeléctricos con embalses llenos y tarifa contenida.`
         },
         {
-          period: "Trimestre 4 (Oct – Dic)",
-          season: "Fin de Lluvias y Entrada de Alisios",
-          status: q4Ok ? "Superado" : "Flanquea",
-          ok: q4Ok,
-          detail: q4Ok
-            ? `Relevo estacional limpio: en noviembre arrancan los vientos >7 m/s en Villa Canales, San Vicente Pacaya y Jutiapa junto con la zafra azucarera.`
-            : `El paso de invierno a época seca genera fricción en la red por desbalance entre generación variable y potencia firme nocturna.`
+          name: 'Trimestre 4 (Oct – Dic)',
+          season: 'Cierre de Lluvias e Inicio de Alisios / Zafra',
+          ok: m.capexScore <= 75 && m.stability >= 68,
+          detail: m.capexScore <= 75
+            ? `Cierre anual con presupuesto de inversión sostenible y transición fluida hacia los vientos de noviembre y la zafra azucarera.`
+            : `Aunque técnicamente genera energía, el presupuesto anual cierra en números rojos por el sobrecosto de perforación geotérmica u obra civil eólica.`
         }
       ];
 
-      document.getElementById('quartersContainer').innerHTML = quarters.map(q => `
-        <div class="p-4 rounded-2xl border ${q.ok ? 'bg-white border-slate-200' : 'bg-rose-50/60 border-rose-200'} shadow-sm flex flex-col justify-between space-y-2">
-          <div>
-            <div class="flex items-center justify-between gap-1 mb-1">
-              <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">${q.period}</span>
-              <span class="text-[11px] font-extrabold px-2 py-0.5 rounded-full ${q.ok ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-200 text-rose-900'}">${q.status}</span>
-            </div>
-            <h5 class="text-sm font-bold text-slate-900">${q.season}</h5>
+      // Cálculo de puntaje global (0 - 100)
+      let score = 88;
+      if (Math.abs(m.totalRen - 70) > 4) score -= Math.round(Math.abs(m.totalRen - 70) * 1.8);
+      if (m.tariffStress > 50) score -= Math.round((m.tariffStress - 50) * 0.8);
+      if (m.capexScore > 62) score -= Math.round((m.capexScore - 62) * 0.85);
+      if (m.stability < 82) score -= Math.round((82 - m.stability) * 1.1);
+
+      // Bonos por sinergias bien ejecutadas
+      if (h > 38 && m.hasDrySeasonRelief) score += 6;
+      if (s > 16 && m.hasSolarBackup) score += 5;
+      score = Math.max(15, Math.min(99, score));
+
+      const resultsSection = document.getElementById('resultsSection');
+      resultsSection.classList.remove('hidden');
+
+      const verdictBanner = document.getElementById('verdictBanner');
+      const verdictTag = document.getElementById('verdictTag');
+      const verdictTitle = document.getElementById('verdictTitle');
+      const verdictSummary = document.getElementById('verdictSummary');
+      const verdictScore = document.getElementById('verdictScore');
+
+      verdictScore.textContent = `${score}/100`;
+
+      if (score >= 76) {
+        verdictBanner.className = 'rounded-2xl p-6 border bg-emerald-950/40 border-emerald-500/50';
+        verdictTag.className = 'px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-300';
+        verdictTag.textContent = '✅ Plan Anual Viable y Equilibrado';
+        verdictTitle.textContent = '¡Tu portafolio híbrido supera las 4 estaciones del año en Guatemala!';
+        verdictSummary.textContent = 'Lograste complementar las debilidades estacionales y técnicas de cada fuente con su energía de relevo correspondiente, manteniendo a raya los hidrocarburos y el presupuesto.';
+      } else if (score >= 58) {
+        verdictBanner.className = 'rounded-2xl p-6 border bg-amber-950/40 border-amber-500/50';
+        verdictTag.className = 'px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-amber-500/20 text-amber-300';
+        verdictTag.textContent = '⚠️ Plan Funcional con Vulnerabilidades Parciales';
+        verdictTitle.textContent = 'El sistema opera, pero presenta presiones en tarifa, presupuesto o cobertura nocturna';
+        verdictSummary.textContent = 'Revisa el diagnóstico inferior: un pequeño ajuste en las energías de relevo (Eólica >3%, Biomasa >13% o Geotérmica ≥4%) convertirá este diseño en un plan óptimo.';
+      } else {
+        verdictBanner.className = 'rounded-2xl p-6 border bg-rose-950/40 border-rose-500/50';
+        verdictTag.className = 'px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-rose-500/20 text-rose-300';
+        verdictTag.textContent = '❌ Plan Desbalanceado • Flanquea en Operación Anual';
+        verdictTitle.textContent = 'La matriz sufre descompensación crítica durante el año';
+        verdictSummary.textContent = 'Apostar por una sola tecnología sin invertir en su complemento estacional o de base provoca apagones, sobrecosto tarifario por hidrocarburos o quiebra presupuestaria.';
+      }
+
+      // Renderizar Trimestres
+      const quartersGrid = document.getElementById('quartersGrid');
+      quartersGrid.innerHTML = quarters.map(q => `
+        <div class="p-4 rounded-xl border ${q.ok ? 'bg-slate-950/80 border-emerald-500/30' : 'bg-rose-950/30 border-rose-500/40'}">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-white">${q.name}</span>
+            <span class="text-xs font-extrabold ${q.ok ? 'text-emerald-400' : 'text-rose-400'}">${q.ok ? '✔ Superado' : '✖ Flanquea'}</span>
           </div>
-          <p class="text-xs text-slate-600 leading-relaxed">${q.detail}</p>
+          <div class="text-[11px] font-semibold text-slate-400 mt-0.5 mb-2">${q.season}</div>
+          <p class="text-xs text-slate-300 leading-relaxed">${q.detail}</p>
         </div>
       `).join('');
 
-      // Recomendación de ingeniería y pregunta de debate
-      document.getElementById('engineeringAdvice').textContent =
-        `Como concluye la exposición (Diapositivas 31 a 35), ninguna tecnología es superior por sí sola: para acercarte al Portafolio Híbrido Óptimo en Guatemala (~32% Hidráulica, ~13.5% Solar On-Grid, ~13% Eólica y ~11.5% Geotérmica), mantén la Hidráulica entre 26% y 36% para no depender de hidrocarburos en época seca, usa la Solar entre 9% y 15% para aprovechar el ROI de 3–5 años sin causar apagones por falta de baterías, y combina un 8%–14% de Eólica y Geotérmica para tener relevo de alisios y base 24/7 sin desfondar el presupuesto en pozos de $8M.`;
+      // Renderizar Diagnóstico Técnico
+      const diagnostics = [];
 
-      document.getElementById('classroomQuestion').textContent =
-        `"Con tu matriz actual (${m.h.toFixed(1)}% Hidro, ${m.s.toFixed(1)}% Solar, ${m.w.toFixed(1)}% Eólica, ${m.g.toFixed(1)}% Geotérmica), ¿preferirías que el Estado asuma el riesgo geológico del 50% en pozos geotérmicos de $4M–$8M para tener energía base 24/7, o exigir baterías obligatorias en la norma NTGDR aunque el ROI solar suba de 4 a 9 años?"`;
-
-      // Mostrar sección y hacer scroll suave
-      const resultsSection = document.getElementById('resultsSection');
-      resultsSection.classList.remove('hidden');
-      lucide.createIcons();
-      setTimeout(() => {
-        resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 60);
-    }
-
-    // Listeners de los 4 Sliders
-    Object.keys(sliders).forEach(key => {
-      sliders[key].addEventListener('input', (e) => {
-        handleSliderChange(key, e.target.value);
-      });
-    });
-
-    // Botón para normalizar manualmente al 70%
-    normalizeBtn.addEventListener('click', () => {
-      const currentSum = Object.values(state).reduce((a, b) => a + b, 0);
-      if (currentSum > 0) {
-        Object.keys(state).forEach(k => {
-          state[k] = Math.round(((state[k] / currentSum) * TARGET_TOTAL) * 2) / 2;
+      // Evaluación Hidro + Relevo
+      if (h > 38 && m.hasDrySeasonRelief) {
+        diagnostics.push({
+          ok: true,
+          title: `Relevo de Época Seca Exitoso (Hidro al ${h.toFixed(1)}%)`,
+          desc: `Aunque la hidroeléctrica es alta, evitaste el colapso de verano gracias a ${w > 3 ? `la Eólica al ${w.toFixed(1)}% (>3%, vientos alisios)` : ''} ${w > 3 && b > 13 ? 'y' : ''} ${b > 13 ? `la Biomasa al ${b.toFixed(1)}% (>13%, cogeneración en zafra)` : ''}.`
+        });
+      } else if (h > 38 && !m.hasDrySeasonRelief) {
+        diagnostics.push({
+          ok: false,
+          title: `Falla en Época Seca por Alta Hidroeléctrica (${h.toFixed(1)}%)`,
+          desc: `Entre noviembre y abril bajan los embalses y tu plan obliga a quemar gasolina/búnker/carbón. Súbele a Eólica (>3%) o Biomasa (>13%) para compensarlo.`
         });
       } else {
-        state = { ...presets.optimo };
+        diagnostics.push({
+          ok: true,
+          title: `Dependencia Hídrica Controlada (${h.toFixed(1)}%)`,
+          desc: `Los embalses aportan energía gestionable sin dejar al país expuesto a las sequías estacionales de verano.`
+        });
       }
-      const sumAfter = Object.values(state).reduce((a, b) => a + b, 0);
-      state.hydro = Math.max(0, Math.round((state.hydro + (TARGET_TOTAL - sumAfter)) * 10) / 10);
-      Object.keys(sliders).forEach(k => { sliders[k].value = state[k]; });
-      updateAllUI();
-    });
 
-    // Listeners de Escenarios Rápidos
-    document.querySelectorAll('.preset-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const presetKey = btn.getAttribute('data-preset');
-        if (presets[presetKey]) {
-          state = { ...presets[presetKey] };
-          Object.keys(sliders).forEach(k => {
-            sliders[k].value = state[k];
-          });
-          updateAllUI();
-        }
-      });
-    });
+      // Evaluación Solar + Cobertura Nocturna
+      if (s > 16 && m.hasSolarBackup) {
+        diagnostics.push({
+          ok: true,
+          title: `Cobertura Solar On-Grid Respaldada (${s.toFixed(1)}%)`,
+          desc: `Aprovechas el rápido retorno solar (3–5 años bajo NTGDR) y cubres la ausencia de baterías a las 6:00 PM mediante energía firme (Geotérmica, Biomasa e Hidro).`
+        });
+      } else if (s > 16 && !m.hasSolarBackup) {
+        diagnostics.push({
+          ok: false,
+          title: `Hueco de Cobertura Nocturna por Exceso Solar (${s.toFixed(1)}%)`,
+          desc: `El 90% de la solar en Guatemala es On-Grid sin baterías y se desconecta en milisegundos por protección Anti-isla. Te falta Geotérmica (≥4%) o Biomasa (≥13%) para la noche.`
+        });
+      } else {
+        diagnostics.push({
+          ok: true,
+          title: `Integración Solar Estable (${s.toFixed(1)}%)`,
+          desc: `La red pública absorbe los excedentes diurnos mediante medición neta bidireccional sin comprometer la estabilidad nocturna.`
+        });
+      }
 
-    // Botones de Evaluación y Reajuste
-    document.getElementById('submitBtn').addEventListener('click', evaluateAnnualPlan);
-    document.getElementById('adjustAgainBtn').addEventListener('click', () => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
+      // Evaluación CAPEX Eólica / Geotérmica
+      if (m.capexScore <= 68) {
+        diagnostics.push({
+          ok: true,
+          title: `Presupuesto de Inversión (CAPEX) Viable (${m.capexScore}/100)`,
+          desc: `El costo de perforación geotérmica ($4M–$8M por pozo de 2,000 m) y el transporte de palas eólicas (>60 m) se mantienen en niveles financiables.`
+        });
+      } else {
+        diagnostics.push({
+          ok: false,
+          title: `Desborde de Presupuesto CAPEX (${m.capexScore}/100)`,
+          desc: `Demasiada dependencia en Geotérmica (${g.toFixed(1)}%, riesgo geológico del 50% a fondo perdido) o Eólica (${w.toFixed(1)}%, obra civil en montaña). Compénsalo con más Solar o Biomasa.`
+        });
+      }
+
+      // Evaluación Meta 70% Renovable vs Hidrocarburos
+      if (m.totalRen >= 67 && m.totalRen <= 73) {
+        diagnostics.push({
+          ok: true,
+          title: `Meta del ~70% Renovable Cumplida (${m.totalRen.toFixed(1)}%)`,
+          desc: `Respetaste la proporción histórica renovable de Guatemala, manteniendo los hidrocarburos (gasolina/carbón) acotados al ~${m.baseFossil.toFixed(1)}%.`
+        });
+      } else {
+        diagnostics.push({
+          ok: false,
+          title: `Desviación de la Meta del 70% Renovable (${m.totalRen.toFixed(1)}%)`,
+          desc: `Tu suma renovable está en ${m.totalRen.toFixed(1)}%, dejando un ${m.baseFossil.toFixed(1)}% a los hidrocarburos. Activa el switch "Fijar Renovables en 70%" arriba a la derecha.`
+        });
+      }
+
+      document.getElementById('diagnosticsList').innerHTML = diagnostics.map(d => `
+        <div class="p-4 rounded-xl border ${d.ok ? 'bg-slate-950/70 border-slate-800' : 'bg-rose-950/25 border-rose-500/40'}">
+          <div class="flex items-center gap-2 font-bold text-xs ${d.ok ? 'text-emerald-400' : 'text-rose-400'}">
+            <span>${d.ok ? '✔' : '✖'}</span>
+            <span>${d.title}</span>
+          </div>
+          <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">${d.desc}</p>
+        </div>
+      `).join('');
+
+      resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 
     // Inicializar al cargar
-    window.addEventListener('DOMContentLoaded', () => {
-      updateAllUI();
-      lucide.createIcons();
-    });
+    updateUI();
   </script>
 </body>
 </html>
